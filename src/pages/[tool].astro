@@ -4,6 +4,7 @@ import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
 import RelatedTools from '@/components/tools/RelatedTools.astro';
 import ToolWorkspaceShell from '@/components/tools/ToolWorkspaceShell';
 import { getActiveTools, type ToolConfig } from '@/config/registry';
+import { getToolContent } from '@/content/tools';
 
 export function getStaticPaths() {
   return getActiveTools('en').map((tool) => ({
@@ -17,6 +18,7 @@ export interface Props {
 }
 
 const { tool } = Astro.props;
+const content = getToolContent(tool.contentKey);
 ---
 
 <BaseLayout
@@ -47,16 +49,24 @@ const { tool } = Astro.props;
     <ToolWorkspaceShell client:load tool={tool} />
 
     <section class="tool-guidance">
-      <h2>How this tool works</h2>
+      <h2>How to use {tool.shortLabel}</h2>
       <ol>
-        <li>Select or drop a supported image file from your device.</li>
-        <li>Adjust the dimensions, target size, or output format as needed.</li>
-        <li>Process locally and verify the actual exported bytes and dimensions before saving.</li>
+        {content.howTo.map((step) => <li>{step}</li>)}
       </ol>
-      <p class="privacy-note">
-        <strong>Privacy:</strong> Image processing happens inside your browser. Files are not uploaded
-        to a remote processing server.
-      </p>
+      {content.notes.map((note) => <p class="privacy-note">{note}</p>)}
+      {
+        content.faq.length > 0 && (
+          <div class="faq-block">
+            <h3>Frequently asked questions</h3>
+            {content.faq.map((item) => (
+              <details class="faq-item">
+                <summary>{item.q}</summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
+          </div>
+        )
+      }
     </section>
 
     <RelatedTools relatedIds={tool.relatedIds} />

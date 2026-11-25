@@ -1,0 +1,65 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import { GUIDES, type GuideEntry } from '@/content/guides';
+
+export function getStaticPaths() {
+  return GUIDES.map((guide) => ({
+    params: { slug: guide.slug },
+    props: { guide },
+  }));
+}
+
+export interface Props {
+  guide: GuideEntry;
+}
+
+const { guide } = Astro.props;
+---
+
+<BaseLayout
+  title={guide.title}
+  description={guide.description}
+  canonicalPath={`/guides/${guide.slug}/`}
+>
+  <article class="container guide-page">
+    <Breadcrumbs
+      items={[
+        { label: 'Home', href: '/' },
+        { label: 'Guides', href: '/tools/' },
+        { label: guide.title.replace(' | PicFitLab', '') },
+      ]}
+    />
+    <h1>{guide.title.replace(' | PicFitLab', '')}</h1>
+    <p class="meta">Updated {guide.publishedAt}</p>
+    {
+      guide.sections.map((section) => (
+        <section>
+          <h2>{section.heading}</h2>
+          {section.paragraphs.map((p) => (
+            <p>{p}</p>
+          ))}
+        </section>
+      ))
+    }
+    <div class="cta-box">
+      <a href={`/${guide.relatedToolSlug}/`} class="btn btn-primary">
+        {guide.relatedToolLabel}
+      </a>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .guide-page {
+    padding-block: var(--space-4) var(--space-8);
+    max-width: 760px;
+  }
+  .meta {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+  .cta-box {
+    margin-top: var(--space-6);
+  }
+</style>

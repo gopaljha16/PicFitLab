@@ -23,9 +23,9 @@ describe('TOOL_REGISTRY', () => {
     expect(getToolById('compress-image-to-50kb')?.defaults.maxBytes).toBe(50000);
   });
 
-  it('excludes draft tools from indexable paths', () => {
+  it('marks all 17 P0 tools published and indexable', () => {
     const nonIndexable = getNonIndexablePaths();
-    expect(nonIndexable.length).toBe(TOOL_REGISTRY.length);
+    expect(nonIndexable.length).toBe(0);
     expect(getActiveTools('en').length).toBe(TOOL_REGISTRY.length);
   });
 });

@@ -2,6 +2,11 @@
 
 All notable changes to PicFitLab will be documented in this file.
 
+## [0.3.0] - 2026-11-25
+
+### Added
+- **Phase 3:** Full interactive `ToolWorkspaceShell` wired to `ImageJobManager` + Web Worker (drag/drop, paste, pre-decode inspection, dimension/crop/target-KB/format/matte controls, cancellation, before/after preview, compliance report table, verified download), per-tool guidance & FAQs (`src/content/tools.ts`), initial guides (`src/content/guides.ts`, `src/pages/guides/[slug].astro`), and all 17 P0 tools published & indexable in `src/config/registry.ts`.
+
 ## [0.2.0] - 2026-11-25
 
 ### Added

@@ -2,6 +2,13 @@
 
 All notable changes to PicFitLab will be documented in this file.
 
+## [0.5.1] - 2026-11-25
+
+### Fixed & Improved
+- Fixed `aspectLock` propagation in `src/engines/contracts.ts` and `src/engines/processor.ts`, plus crop bounds clamping in `ToolWorkspaceShell.tsx`.
+- Pre-filled `width`/`height` on `resize-image` when loading an image, added quick presets for `resize-image` and `compress-image-to-kb`, added alpha-checkerboard preview backgrounds, drag-over dropzone highlight, and a detailed inspection card for `image-size-checker`.
+- Added `RecentTools` local-storage client island on the homepage and Escape/outside-click close handling on the mobile menu.
+
 ## [0.5.0] - 2026-11-25
 
 ### Added

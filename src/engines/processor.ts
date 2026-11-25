@@ -83,7 +83,7 @@ export async function runImageJob(
         sourceH,
         request.constraints.width,
         request.constraints.height,
-        true
+        request.constraints.aspectLock ?? true
       );
 
       const outputMime =

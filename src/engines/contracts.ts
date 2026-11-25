@@ -52,6 +52,7 @@ export interface CropRect {
 export interface JobConstraints {
   width?: number;
   height?: number;
+  aspectLock?: boolean;
   maxBytes?: number;
   minBytes?: number;
   format: SupportedOutputMime;

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ToolSearch from '@/components/tools/ToolSearch';
+import RecentTools from '@/components/tools/RecentTools';
 import { getActiveTools, getToolById } from '@/config/registry';
 import { SITE_CONFIG } from '@/config/flags';
 
@@ -65,6 +66,8 @@ const jsonLd = [
       </div>
     </div>
   </section>
+
+  <RecentTools client:idle tools={searchItems} />
 
   <section class="container section">
     <h2>Popular tools</h2>

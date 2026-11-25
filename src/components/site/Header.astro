@@ -34,7 +34,7 @@ const currentPath = Astro.url.pathname;
       }
     </nav>
 
-    <details class="mobile-menu">
+    <details class="mobile-menu" id="mobile-nav-details">
       <summary class="btn btn-secondary mobile-menu-toggle" aria-label="Toggle menu">
         Menu
       </summary>
@@ -53,6 +53,23 @@ const currentPath = Astro.url.pathname;
     </details>
   </div>
 </header>
+
+<script is:inline>
+  (() => {
+    const details = document.getElementById('mobile-nav-details');
+    if (!details) return;
+    document.addEventListener('click', (e) => {
+      if (details.hasAttribute('open') && e.target instanceof Node && !details.contains(e.target)) {
+        details.removeAttribute('open');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && details.hasAttribute('open')) {
+        details.removeAttribute('open');
+      }
+    });
+  })();
+</script>
 
 <style>
   .site-header {

@@ -42,6 +42,10 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1_000_000).toFixed(2)} MB (${bytes.toLocaleString()} B)`;
 }
 
+function gcd(a: number, b: number): number {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
 export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const managerRef = useRef<ImageJobManager | null>(null);
@@ -50,6 +54,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
   const [inspection, setInspection] = useState<ImageInspection | null>(null);
   const [inputPreviewUrl, setInputPreviewUrl] = useState<string | null>(null);
   const [outputPreviewUrl, setOutputPreviewUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   const [width, setWidth] = useState<string>(tool.defaults.width ? String(tool.defaults.width) : '');
   const [height, setHeight] = useState<string>(
@@ -68,7 +73,6 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
   const [qualityFloor, setQualityFloor] = useState<number>(20);
   const [matteColor, setMatteColor] = useState<string>(tool.defaults.matteColor ?? '#ffffff');
 
-  // Numeric crop controls for crop-image & general precision
   const [cropX, setCropX] = useState<string>('0');
   const [cropY, setCropY] = useState<string>('0');
   const [cropW, setCropW] = useState<string>('');
@@ -126,14 +130,31 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         setCropH(String(info.height));
       }
 
-      if (!tool.defaults.format && (info.detectedMime === 'image/jpeg' || info.detectedMime === 'image/png' || info.detectedMime === 'image/webp')) {
+      // Pre-fill dimensions on free resize tool when no preset dimensions exist
+      if (
+        tool.engine === 'resize' &&
+        tool.id !== 'crop-image' &&
+        !tool.defaults.width &&
+        !tool.defaults.height &&
+        info.width &&
+        info.height
+      ) {
+        setWidth(String(info.width));
+        setHeight(String(info.height));
+      }
+
+      if (
+        !tool.defaults.format &&
+        (info.detectedMime === 'image/jpeg' ||
+          info.detectedMime === 'image/png' ||
+          info.detectedMime === 'image/webp')
+      ) {
         setFormat(info.detectedMime);
       }
 
       setInputPreviewUrl(URL.createObjectURL(file));
       setStage('ready');
 
-      // Auto-run read-only inspect tool
       if (tool.engine === 'inspect') {
         const inspectResult = await managerRef.current?.run(
           {
@@ -189,6 +210,12 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     }
   };
 
+  const applyScalePreset = (scale: number) => {
+    if (!inspection?.width || !inspection?.height) return;
+    setWidth(String(Math.max(1, Math.round(inspection.width * scale))));
+    setHeight(String(Math.max(1, Math.round(inspection.height * scale))));
+  };
+
   const applyCropRatio = (ratioW: number, ratioH: number) => {
     if (!inspection?.width || !inspection?.height) return;
     const srcW = inspection.width;
@@ -218,11 +245,15 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
 
     let cropRect: CropRect | undefined;
     if (tool.id === 'crop-image' && cropW.trim() && cropH.trim()) {
+      const x = Math.max(0, Number(cropX) || 0);
+      const y = Math.max(0, Number(cropY) || 0);
+      const maxW = inspection?.width ? Math.max(1, inspection.width - x) : Number(cropW);
+      const maxH = inspection?.height ? Math.max(1, inspection.height - y) : Number(cropH);
       cropRect = {
-        x: Math.max(0, Number(cropX) || 0),
-        y: Math.max(0, Number(cropY) || 0),
-        width: Math.max(1, Number(cropW)),
-        height: Math.max(1, Number(cropH)),
+        x,
+        y,
+        width: Math.max(1, Math.min(maxW, Number(cropW))),
+        height: Math.max(1, Math.min(maxH, Number(cropH))),
       };
     }
 
@@ -235,6 +266,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         constraints: {
           ...(parsedW ? { width: parsedW } : {}),
           ...(parsedH ? { height: parsedH } : {}),
+          aspectLock,
           ...(parsedMaxBytes ? { maxBytes: parsedMaxBytes } : {}),
           format,
           fit,
@@ -283,6 +315,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragging(false);
     void handleFile(e.dataTransfer.files?.[0]);
   };
 
@@ -299,6 +332,12 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     return Math.round(((inspection.bytes - result.actual.bytes) / inspection.bytes) * 100);
   }, [inspection, result]);
 
+  const aspectRatioLabel = useMemo(() => {
+    if (!inspection?.width || !inspection?.height) return 'Unknown';
+    const d = gcd(inspection.width, inspection.height);
+    return `${inspection.width / d}:${inspection.height / d}`;
+  }, [inspection]);
+
   return (
     <section
       aria-label={`${tool.shortLabel} workspace`}
@@ -307,14 +346,23 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       onPaste={onPaste}
     >
       <div
-        onDragOver={(e) => e.preventDefault()}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
         style={{
-          border: '2px dashed var(--color-border)',
+          border: `2px dashed ${isDragging ? 'var(--color-primary)' : 'var(--color-border)'}`,
           borderRadius: 'var(--radius-md)',
           padding: '24px 16px',
           textAlign: 'center',
-          backgroundColor: 'var(--color-surface)',
+          backgroundColor: isDragging ? 'var(--color-primary-soft)' : 'var(--color-surface)',
+          transition: 'border-color 150ms ease, background-color 150ms ease',
         }}
       >
         <Upload size={28} aria-hidden="true" style={{ marginInline: 'auto', color: 'var(--color-primary)' }} />
@@ -417,6 +465,54 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         </div>
       )}
 
+      {tool.engine === 'inspect' && inspection && (
+        <div
+          style={{
+            marginTop: '16px',
+            padding: '16px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-surface)',
+          }}
+        >
+          <h3 style={{ margin: '0 0 12px', fontSize: '1rem' }}>Detailed Image Report</h3>
+          <dl
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '12px',
+              margin: 0,
+              fontSize: '0.875rem',
+            }}
+          >
+            <div>
+              <dt style={{ color: 'var(--color-text-secondary)' }}>Detected MIME</dt>
+              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>{inspection.detectedMime}</dd>
+            </div>
+            <div>
+              <dt style={{ color: 'var(--color-text-secondary)' }}>File extension</dt>
+              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>
+                {inspection.extension ? `.${inspection.extension}` : 'None'}
+              </dd>
+            </div>
+            <div>
+              <dt style={{ color: 'var(--color-text-secondary)' }}>Exact bytes / KiB</dt>
+              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>
+                {inspection.bytes.toLocaleString()} B ({(inspection.bytes / 1024).toFixed(1)} KiB)
+              </dd>
+            </div>
+            <div>
+              <dt style={{ color: 'var(--color-text-secondary)' }}>Megapixels / Ratio</dt>
+              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>
+                {inspection.width && inspection.height
+                  ? `${((inspection.width * inspection.height) / 1_000_000).toFixed(2)} MP (${aspectRatioLabel})`
+                  : 'Unknown'}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      )}
+
       {tool.engine !== 'inspect' && (
         <div
           style={{
@@ -428,6 +524,39 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         >
           {(tool.engine === 'resize' || tool.engine === 'fix') && tool.id !== 'crop-image' && (
             <>
+              {tool.id === 'resize-image' && inspection?.width && inspection?.height && (
+                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.875rem', alignSelf: 'center' }}>
+                    Quick presets:
+                  </span>
+                  <button type="button" className="btn btn-secondary" onClick={() => applyScalePreset(0.5)}>
+                    50%
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => applyScalePreset(0.75)}>
+                    75%
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setWidth('600');
+                      setHeight('600');
+                    }}
+                  >
+                    600×600
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setWidth('1080');
+                      setHeight('1080');
+                    }}
+                  >
+                    1080×1080
+                  </button>
+                </div>
+              )}
               <div>
                 <label htmlFor="ctrl-width" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
                   Width (px)
@@ -526,6 +655,20 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                 <button type="button" className="btn btn-secondary" onClick={() => applyCropRatio(16, 9)}>
                   16:9
                 </button>
+                {inspection?.width && inspection?.height && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setCropX('0');
+                      setCropY('0');
+                      setCropW(String(inspection.width));
+                      setCropH(String(inspection.height));
+                    }}
+                  >
+                    Full image
+                  </button>
+                )}
               </div>
               <div>
                 <label htmlFor="crop-x" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
@@ -616,6 +759,23 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
 
           {(tool.engine === 'compress' || tool.engine === 'fix') && (
             <>
+              {tool.id === 'compress-image-to-kb' && (
+                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.875rem', alignSelf: 'center' }}>
+                    Target presets:
+                  </span>
+                  {[20, 50, 100, 200, 500].map((kb) => (
+                    <button
+                      key={kb}
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setMaxKb(String(kb))}
+                    >
+                      {kb} KB
+                    </button>
+                  ))}
+                </div>
+              )}
               <div>
                 <label htmlFor="ctrl-max-kb" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
                   Target max size (KB, 1 KB = 1,000 B)
@@ -797,18 +957,21 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           {inputPreviewUrl && (
             <figure style={{ margin: 0 }}>
               <figcaption style={{ fontSize: '0.8125rem', fontWeight: 600, marginBottom: '6px' }}>
-                Original
+                Original{' '}
+                {inspection
+                  ? `· ${inspection.width ?? '?'}×${inspection.height ?? '?'} · ${formatBytes(inspection.bytes)}`
+                  : ''}
               </figcaption>
               <img
                 src={inputPreviewUrl}
                 alt="Original input preview"
+                className="alpha-checkerboard"
                 style={{
                   maxHeight: '240px',
                   width: '100%',
                   objectFit: 'contain',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface)',
                 }}
               />
             </figure>
@@ -816,18 +979,24 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           {outputPreviewUrl && (
             <figure style={{ margin: 0 }}>
               <figcaption style={{ fontSize: '0.8125rem', fontWeight: 600, marginBottom: '6px' }}>
-                Result {savingsPct !== null ? `(${savingsPct >= 0 ? `-${savingsPct}%` : `+${Math.abs(savingsPct)}%`})` : ''}
+                Result{' '}
+                {result?.actual
+                  ? `· ${result.actual.width}×${result.actual.height} · ${formatBytes(result.actual.bytes)}`
+                  : ''}
+                {savingsPct !== null
+                  ? ` (${savingsPct >= 0 ? `-${savingsPct}%` : `+${Math.abs(savingsPct)}%`})`
+                  : ''}
               </figcaption>
               <img
                 src={outputPreviewUrl}
                 alt="Processed output preview"
+                className="alpha-checkerboard"
                 style={{
                   maxHeight: '240px',
                   width: '100%',
                   objectFit: 'contain',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface)',
                 }}
               />
             </figure>

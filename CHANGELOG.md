@@ -2,6 +2,11 @@
 
 All notable changes to PicFitLab will be documented in this file.
 
+## [0.4.0] - 2026-11-25
+
+### Added & Verified
+- **Phase 4:** Playwright E2E, privacy network-interception, and `axe-core` accessibility test suite (`tests/e2e/tools.spec.ts`). Fixed keyboard-focusable scrollable table region on homepage and file input `aria-label` in `ToolWorkspaceShell`. All 10 E2E tests (Desktop Chrome & Mobile Chrome), 17 unit tests, `eslint`, `astro check`, and build budget checks pass.
+
 ## [0.3.0] - 2026-11-25
 
 ### Added

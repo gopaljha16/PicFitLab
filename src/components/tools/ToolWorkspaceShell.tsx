@@ -326,6 +326,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           type="file"
           accept={tool.acceptedFormats.join(',')}
           onChange={onFileChange}
+          aria-label="Choose image file"
           className="sr-only"
           id={`file-input-${tool.id}`}
         />

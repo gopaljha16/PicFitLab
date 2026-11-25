@@ -1,0 +1,80 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import { getActiveTools, type ToolCategory } from '@/config/registry';
+
+const tools = getActiveTools('en');
+const categories: Array<{ key: ToolCategory; title: string }> = [
+  { key: 'fix', title: 'Upload Fixers & Checkers' },
+  { key: 'compress', title: 'Image Compressors' },
+  { key: 'resize', title: 'Resizers & Croppers' },
+  { key: 'convert', title: 'Format Converters' },
+  { key: 'privacy', title: 'Metadata & Privacy' },
+];
+---
+
+<BaseLayout
+  title="All Image Tools | PicFitLab"
+  description="Browse all free, local browser-based image compression, resizing, conversion, and privacy tools on PicFitLab."
+  canonicalPath="/tools/"
+>
+  <div class="container page-wrap">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'All Tools' }]} />
+    <h1>All Image Tools</h1>
+    <p class="lead">
+      Every tool runs locally in your browser without uploading your images to a server.
+    </p>
+
+    {
+      categories.map((cat) => {
+        const items = tools.filter((t) => t.category === cat.key);
+        if (items.length === 0) return null;
+        return (
+          <section class="category-section">
+            <h2>{cat.title}</h2>
+            <div class="tool-grid">
+              {items.map((tool) => (
+                <a href={`/${tool.slug}/`} class="card tool-card">
+                  <strong>{tool.shortLabel}</strong>
+                  <p>{tool.summary}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+      })
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page-wrap {
+    padding-block: var(--space-4) var(--space-8);
+  }
+  .lead {
+    color: var(--color-text-secondary);
+  }
+  .category-section {
+    margin-top: var(--space-8);
+  }
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+  }
+  .tool-card {
+    display: block;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .tool-card:hover {
+    border-color: var(--color-primary);
+    text-decoration: none;
+  }
+  .tool-card p {
+    margin: var(--space-1) 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+</style>

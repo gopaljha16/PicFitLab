@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import { SITE_CONFIG } from '@/config/flags';
+---
+
+<BaseLayout
+  title="Privacy Policy | PicFitLab"
+  description="How PicFitLab handles local browser image processing, static hosting, and user privacy."
+  canonicalPath="/privacy/"
+>
+  <div class="container legal-page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Privacy Policy' }]} />
+    <h1>Privacy Policy</h1>
+    <p>
+      <strong>Local image processing:</strong> {SITE_CONFIG.name} processes images directly inside
+      your web browser. Your image files, pixel data, and EXIF metadata are not uploaded to an
+      image-processing server.
+    </p>
+    <h2>Static hosting and infrastructure</h2>
+    <p>
+      This website is served as static files. Standard web hosting infrastructure may process
+      transient connection metadata (such as IP address and request headers) to deliver pages
+      securely.
+    </p>
+    <h2>Local browser storage</h2>
+    <p>
+      Optional interface preferences may be saved in your browser&apos;s local storage. Raw photos
+      and personal documents are not persisted in browser storage by default.
+    </p>
+    <h2>Contact</h2>
+    <p>
+      For privacy questions, contact <a href={`mailto:${SITE_CONFIG.supportEmail}`}>{SITE_CONFIG.supportEmail}</a>.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    padding-block: var(--space-4) var(--space-8);
+    max-width: 760px;
+  }
+</style>

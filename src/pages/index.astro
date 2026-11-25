@@ -1,0 +1,255 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ToolSearch from '@/components/tools/ToolSearch';
+import { getActiveTools, getToolById } from '@/config/registry';
+import { SITE_CONFIG } from '@/config/flags';
+
+const allTools = getActiveTools('en');
+const popularIds = [
+  'fix-image-upload-error',
+  'compress-image-to-50kb',
+  'resize-image-to-600x600',
+  'compress-image',
+  'resize-image',
+  'png-to-jpg',
+  'remove-image-metadata',
+  'image-size-checker',
+];
+const popularTools = popularIds
+  .map((id) => getToolById(id))
+  .filter((t): t is NonNullable<typeof t> => Boolean(t));
+
+const searchItems = allTools.map((t) => ({
+  id: t.id,
+  slug: t.slug,
+  shortLabel: t.shortLabel,
+  summary: t.summary,
+  category: t.category,
+}));
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+  },
+];
+---
+
+<BaseLayout
+  title="Free Online Image Resizer, Compressor & Converter | PicFitLab"
+  description="Resize, compress to exact KB targets, convert formats, and fix image upload errors locally in your browser without uploading files."
+  canonicalPath="/"
+  jsonLd={jsonLd}
+>
+  <section class="hero">
+    <div class="container hero-inner">
+      <h1>Free Online Image Tools</h1>
+      <p class="hero-copy">
+        Resize dimensions, compress to exact KB limits, convert formats, and remove GPS metadata
+        locally in your browser. Your images stay on your device.
+      </p>
+      <div class="hero-actions">
+        <a href="/fix-image-upload-error/" class="btn btn-primary">Fix upload error</a>
+        <a href="/tools/" class="btn btn-secondary">Explore all tools</a>
+      </div>
+      <div class="hero-search">
+        <ToolSearch client:idle tools={searchItems} />
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <h2>Popular tools</h2>
+    <div class="tool-grid">
+      {
+        popularTools.map((tool) => (
+          <a href={`/${tool.slug}/`} class="card tool-card">
+            <span class="badge">{tool.category}</span>
+            <h3>{tool.shortLabel}</h3>
+            <p>{tool.summary}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="card spotlight">
+      <div>
+        <span class="badge">Flagship workflow</span>
+        <h2>Upload Error Fixer</h2>
+        <p>
+          Portal rejecting your photo? Combine target format, exact pixel dimensions, and maximum KB
+          size in one pass, then verify the actual exported file before uploading.
+        </p>
+        <a href="/fix-image-upload-error/" class="btn btn-primary">Open Upload Error Fixer</a>
+      </div>
+      <div class="spotlight-table-wrap">
+        <table class="spotlight-table">
+          <caption>Illustrative technical verification report</caption>
+          <thead>
+            <tr>
+              <th>Check</th>
+              <th>Input</th>
+              <th>Required</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Format</td>
+              <td>PNG</td>
+              <td>JPEG</td>
+              <td>JPEG — pass</td>
+            </tr>
+            <tr>
+              <td>Dimensions</td>
+              <td>1920×1080</td>
+              <td>600×600</td>
+              <td>600×600 — pass</td>
+            </tr>
+            <tr>
+              <td>File size</td>
+              <td>2,400,000 B</td>
+              <td>≤ 50,000 B</td>
+              <td>48,600 B — pass</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <h2>How local processing works</h2>
+    <div class="steps-grid">
+      <div class="card">
+        <h3>1. Choose an image</h3>
+        <p>Select or drop a local JPG, PNG, or WebP file. Nothing is sent to a remote server.</p>
+      </div>
+      <div class="card">
+        <h3>2. Set requirements</h3>
+        <p>Pick pixel dimensions, target file size in KB, output format, or metadata removal.</p>
+      </div>
+      <div class="card">
+        <h3>3. Verify &amp; download</h3>
+        <p>Inspect the actual output bytes, dimensions, and format before saving to your device.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding-block: var(--space-12);
+  }
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 760px;
+    margin-inline: 0;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: 1.15;
+  }
+  .hero-copy {
+    margin: 0;
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .hero-search {
+    margin-top: var(--space-2);
+  }
+  .section {
+    padding-block: var(--space-8);
+  }
+  .section h2 {
+    margin-top: 0;
+  }
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .tool-card:hover {
+    border-color: var(--color-primary);
+    text-decoration: none;
+  }
+  .tool-card h3 {
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+  .tool-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+  .spotlight {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  @media (min-width: 768px) {
+    .spotlight {
+      grid-template-columns: 1.1fr 1fr;
+    }
+  }
+  .spotlight-table-wrap {
+    overflow-x: auto;
+  }
+  .spotlight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .spotlight-table caption {
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+  }
+  .spotlight-table th,
+  .spotlight-table td {
+    text-align: left;
+    padding: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+  }
+  .steps-grid h3 {
+    margin-top: 0;
+  }
+  .steps-grid p {
+    margin-bottom: 0;
+    color: var(--color-text-secondary);
+  }
+</style>

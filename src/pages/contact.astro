@@ -1,0 +1,31 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import { SITE_CONFIG } from '@/config/flags';
+---
+
+<BaseLayout
+  title="Contact | PicFitLab"
+  description="Contact PicFitLab for support, bug reports, or security disclosures."
+  canonicalPath="/contact/"
+>
+  <div class="container legal-page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
+    <h1>Contact</h1>
+    <p>
+      Have a bug report, feature suggestion, or security disclosure? Email us at{' '}
+      <a href={`mailto:${SITE_CONFIG.supportEmail}`}>{SITE_CONFIG.supportEmail}</a>.
+    </p>
+    <p>
+      Please do not attach sensitive personal documents when reporting an issue; describe the file
+      format, approximate dimensions, and browser version instead.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    padding-block: var(--space-4) var(--space-8);
+    max-width: 760px;
+  }
+</style>

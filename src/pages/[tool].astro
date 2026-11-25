@@ -1,0 +1,92 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import RelatedTools from '@/components/tools/RelatedTools.astro';
+import ToolWorkspaceShell from '@/components/tools/ToolWorkspaceShell';
+import { getActiveTools, type ToolConfig } from '@/config/registry';
+
+export function getStaticPaths() {
+  return getActiveTools('en').map((tool) => ({
+    params: { tool: tool.slug },
+    props: { tool },
+  }));
+}
+
+export interface Props {
+  tool: ToolConfig;
+}
+
+const { tool } = Astro.props;
+---
+
+<BaseLayout
+  title={tool.title}
+  description={tool.description}
+  canonicalPath={`/${tool.slug}/`}
+  noindex={!tool.indexable}
+>
+  <div class="container tool-page">
+    <Breadcrumbs
+      items={[
+        { label: 'Home', href: '/' },
+        { label: 'Tools', href: '/tools/' },
+        { label: tool.shortLabel },
+      ]}
+    />
+
+    <h1>{tool.h1}</h1>
+    <p class="tool-intro">{tool.summary}</p>
+
+    <noscript>
+      <p class="card noscript-note">
+        JavaScript is required to run local browser image processing. Enable JavaScript to use this
+        tool.
+      </p>
+    </noscript>
+
+    <ToolWorkspaceShell client:load tool={tool} />
+
+    <section class="tool-guidance">
+      <h2>How this tool works</h2>
+      <ol>
+        <li>Select or drop a supported image file from your device.</li>
+        <li>Adjust the dimensions, target size, or output format as needed.</li>
+        <li>Process locally and verify the actual exported bytes and dimensions before saving.</li>
+      </ol>
+      <p class="privacy-note">
+        <strong>Privacy:</strong> Image processing happens inside your browser. Files are not uploaded
+        to a remote processing server.
+      </p>
+    </section>
+
+    <RelatedTools relatedIds={tool.relatedIds} />
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page {
+    padding-block: var(--space-4) var(--space-8);
+  }
+  .tool-page h1 {
+    margin: var(--space-2) 0;
+    font-size: clamp(1.5rem, 3vw, 2.125rem);
+  }
+  .tool-intro {
+    margin: 0;
+    color: var(--color-text-secondary);
+    max-width: 720px;
+  }
+  .noscript-note {
+    margin-top: var(--space-4);
+    border-color: var(--color-warning);
+    background-color: var(--color-warning-soft);
+  }
+  .tool-guidance {
+    margin-top: var(--space-8);
+    max-width: 760px;
+  }
+  .privacy-note {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+  }
+</style>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://picfitlab.com/sitemap-index.xml

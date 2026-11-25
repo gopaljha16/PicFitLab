@@ -1,0 +1,33 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import { SITE_CONFIG } from '@/config/flags';
+---
+
+<BaseLayout
+  title="About PicFitLab | PicFitLab"
+  description="Learn how PicFitLab helps users resize, compress, and convert images locally in the browser."
+  canonicalPath="/about/"
+>
+  <div class="container legal-page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
+    <h1>About {SITE_CONFIG.name}</h1>
+    <p>
+      {SITE_CONFIG.name} is built to solve everyday image upload blocks—such as strict kilobyte
+      caps, exact pixel dimensions, and incompatible formats—without requiring users to upload
+      their photos to remote servers.
+    </p>
+    <h2>How it is built</h2>
+    <p>
+      Tools run directly in your browser using standard Web APIs and Web Workers, reporting the
+      actual exported bytes, dimensions, and format before you download.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    padding-block: var(--space-4) var(--space-8);
+    max-width: 760px;
+  }
+</style>

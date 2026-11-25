@@ -1,0 +1,38 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import { SITE_CONFIG } from '@/config/flags';
+---
+
+<BaseLayout
+  title="Terms of Use | PicFitLab"
+  description="Terms of use and limitations for PicFitLab browser-based image tools."
+  canonicalPath="/terms/"
+>
+  <div class="container legal-page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Terms of Use' }]} />
+    <h1>Terms of Use</h1>
+    <p>
+      {SITE_CONFIG.name} provides browser-based image resizing, compression, conversion, and
+      inspection utilities free of charge on an &ldquo;as is&rdquo; basis.
+    </p>
+    <h2>No official acceptance guarantee</h2>
+    <p>
+      Technical checks verify file size, pixel dimensions, and file format of the exported image
+      against the criteria you select. {SITE_CONFIG.name} does not guarantee acceptance by any
+      third-party portal, exam board, employer, or government agency.
+    </p>
+    <h2>User responsibility</h2>
+    <p>
+      You are responsible for ensuring you have the right to process any images you select and for
+      verifying exported files before submitting them to external services.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    padding-block: var(--space-4) var(--space-8);
+    max-width: 760px;
+  }
+</style>

@@ -1,0 +1,43 @@
+{
+  "name": "picfitlab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check && tsc --noEmit",
+    "lint": "eslint src scripts tests",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,astro,css}\" \"scripts/**/*.mjs\"",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "validate:registry": "node scripts/validate-registry.mjs",
+    "check:build": "node scripts/check-build.mjs"
+  },
+  "dependencies": {
+    "@astrojs/react": "^7.1.9",
+    "@astrojs/sitemap": "^3.7.6",
+    "astro": "^7.4.13",
+    "lucide-react": "^1.78.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^10.15.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "jsdom": "^31.0.1",
+    "prettier": "^3.10.1",
+    "prettier-plugin-astro": "^1.1.2",
+    "typescript": "5.8.3",
+    "typescript-eslint": "^8.74.0",
+    "vitest": "^5.1.1"
+  }
+}

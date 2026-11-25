@@ -1,0 +1,54 @@
+---
+import { getToolById, type ToolConfig } from '@/config/registry';
+
+export interface Props {
+  relatedIds: string[];
+}
+
+const { relatedIds } = Astro.props;
+const relatedTools = relatedIds
+  .map((id) => getToolById(id))
+  .filter((tool): tool is ToolConfig => Boolean(tool));
+---
+
+{
+  relatedTools.length > 0 && (
+    <section class="related-section" aria-labelledby="related-tools-heading">
+      <h2 id="related-tools-heading">Related tools</h2>
+      <div class="related-grid">
+        {relatedTools.map((tool) => (
+          <a href={`/${tool.slug}/`} class="card related-card">
+            <strong>{tool.shortLabel}</strong>
+            <p>{tool.summary}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .related-section {
+    margin-top: var(--space-8);
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+  }
+  .related-card {
+    display: block;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .related-card:hover {
+    border-color: var(--color-primary);
+    text-decoration: none;
+  }
+  .related-card p {
+    margin: var(--space-1) 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+</style>

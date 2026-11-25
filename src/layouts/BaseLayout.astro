@@ -1,0 +1,28 @@
+---
+import '@/styles/tokens.css';
+import '@/styles/global.css';
+import Head, { type Props as HeadProps } from '@/components/seo/Head.astro';
+import Header from '@/components/site/Header.astro';
+import Footer from '@/components/site/Footer.astro';
+
+export interface Props extends HeadProps {
+  lang?: string;
+}
+
+const { lang = 'en', ...headProps } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <Head {...headProps} />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

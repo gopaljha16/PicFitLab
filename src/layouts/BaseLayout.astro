@@ -4,12 +4,16 @@ import '@/styles/global.css';
 import Head, { type Props as HeadProps } from '@/components/seo/Head.astro';
 import Header from '@/components/site/Header.astro';
 import Footer from '@/components/site/Footer.astro';
+import ConsentBanner from '@/components/ads/ConsentBanner';
+import { ADSENSE_CLIENT, ADS_ENABLED } from '@/config/flags';
 
 export interface Props extends HeadProps {
   lang?: string;
+  allowAds?: boolean;
 }
 
-const { lang = 'en', ...headProps } = Astro.props;
+const { lang = 'en', allowAds = true, ...headProps } = Astro.props;
+const showAdsOnPage = ADS_ENABLED && allowAds;
 ---
 
 <!doctype html>
@@ -24,5 +28,6 @@ const { lang = 'en', ...headProps } = Astro.props;
       <slot />
     </main>
     <Footer />
+    {showAdsOnPage && <ConsentBanner client:idle adsEnabled={showAdsOnPage} adsenseClient={ADSENSE_CLIENT} />}
   </body>
 </html>

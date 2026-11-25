@@ -2,6 +2,11 @@
 
 All notable changes to PicFitLab will be documented in this file.
 
+## [0.5.0] - 2026-11-25
+
+### Added
+- **Monetization Readiness:** Env-driven AdSense configuration (`src/config/flags.ts`, `.env.example`, `public/ads.txt.example`), consent-aware `ConsentBanner` (`src/components/ads/ConsentBanner.tsx`, `src/lib/consent.ts`), fixed-height `AdSlot` (`src/components/ads/AdSlot.astro`) placed only on eligible non-sensitive pages (`tools/`, `guides/`, and below-content on `general` tool pages), and local data / consent withdrawal controls on `/privacy/`.
+
 ## [0.4.0] - 2026-11-25
 
 ### Added & Verified

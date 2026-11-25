@@ -1,0 +1,56 @@
+---
+import { ADSENSE_CLIENT, ADS_ENABLED } from '@/config/flags';
+
+export interface Props {
+  slotId: string;
+  label?: string;
+  minHeightPx?: number;
+}
+
+const { slotId, label = 'Advertisement', minHeightPx = 100 } = Astro.props;
+const shouldRender = ADS_ENABLED && Boolean(ADSENSE_CLIENT) && Boolean(slotId);
+---
+
+{
+  shouldRender && (
+    <aside
+      class="ad-slot-container"
+      aria-label={label}
+      style={`min-height: ${minHeightPx}px;`}
+    >
+      <span class="ad-slot-label">{label}</span>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={slotId}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+      <script
+        is:inline
+        set:html={`try{if(localStorage.getItem('picfitlab_consent_v1')==='accepted'){(window.adsbygoogle=window.adsbygoogle||[]).push({});}}catch{}`}
+      />
+    </aside>
+  )
+}
+
+<style>
+  .ad-slot-container {
+    margin-block: var(--space-8);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    text-align: center;
+    overflow: hidden;
+  }
+  .ad-slot-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+</style>

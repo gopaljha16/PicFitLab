@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import { ADSENSE_SLOTS } from '@/config/flags';
 import { GUIDES, type GuideEntry } from '@/content/guides';
 
 export function getStaticPaths() {
@@ -47,6 +49,8 @@ const { guide } = Astro.props;
         {guide.relatedToolLabel}
       </a>
     </div>
+
+    <AdSlot slotId={ADSENSE_SLOTS.guideBanner} minHeightPx={100} />
   </article>
 </BaseLayout>
 

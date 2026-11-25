@@ -23,11 +23,36 @@ import { SITE_CONFIG } from '@/config/flags';
       transient connection metadata (such as IP address and request headers) to deliver pages
       securely.
     </p>
-    <h2>Local browser storage</h2>
+    <h2>Local browser storage &amp; consent withdrawal</h2>
     <p>
-      Optional interface preferences may be saved in your browser&apos;s local storage. Raw photos
-      and personal documents are not persisted in browser storage by default.
+      Optional interface preferences (recent tools) and advertising consent choices may be saved
+      in your browser&apos;s local storage. Raw photos and personal documents are not persisted in
+      browser storage by default.
     </p>
+    <p>
+      <button type="button" id="reset-local-data-btn" class="btn btn-secondary">
+        Clear saved preferences &amp; reset ad consent
+      </button>
+      <span id="reset-local-data-status" style="margin-left: 12px; font-size: 0.875rem;"></span>
+    </p>
+    <script is:inline>
+      (() => {
+        const btn = document.getElementById('reset-local-data-btn');
+        const status = document.getElementById('reset-local-data-status');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          try {
+            localStorage.removeItem('picfitlab_consent_v1');
+            localStorage.removeItem('picfitlab_recent_tools');
+            localStorage.removeItem('picfitlab_favorite_tools');
+            window.dispatchEvent(new CustomEvent('picfitlab:consent-changed', { detail: 'unset' }));
+            if (status) status.textContent = 'Local preferences and consent choice cleared.';
+          } catch {
+            if (status) status.textContent = 'Browser storage is unavailable.';
+          }
+        });
+      })();
+    </script>
     <h2>Contact</h2>
     <p>
       For privacy questions, contact <a href={`mailto:${SITE_CONFIG.supportEmail}`}>{SITE_CONFIG.supportEmail}</a>.

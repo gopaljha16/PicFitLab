@@ -1,6 +1,16 @@
+export const ADSENSE_CLIENT = (import.meta.env.PUBLIC_ADSENSE_CLIENT ?? '').trim();
+export const ADS_ENABLED =
+  import.meta.env.PUBLIC_ADS_ENABLED === 'true' && ADSENSE_CLIENT.startsWith('ca-pub-');
+
+export const ADSENSE_SLOTS = {
+  directoryBanner: (import.meta.env.PUBLIC_ADSENSE_SLOT_DIRECTORY ?? '').trim(),
+  guideBanner: (import.meta.env.PUBLIC_ADSENSE_SLOT_GUIDE ?? '').trim(),
+  generalToolBottom: (import.meta.env.PUBLIC_ADSENSE_SLOT_TOOL ?? '').trim(),
+} as const;
+
 export const FEATURE_FLAGS = {
-  adsEnabled: false,
-  analyticsEnabled: false,
+  adsEnabled: ADS_ENABLED,
+  analyticsEnabled: import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true',
   pwaEnabled: false,
 } as const;
 

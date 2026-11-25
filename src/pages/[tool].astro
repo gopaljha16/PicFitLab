@@ -3,6 +3,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
 import RelatedTools from '@/components/tools/RelatedTools.astro';
 import ToolWorkspaceShell from '@/components/tools/ToolWorkspaceShell';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import { ADSENSE_SLOTS } from '@/config/flags';
 import { getActiveTools, type ToolConfig } from '@/config/registry';
 import { getToolContent } from '@/content/tools';
 
@@ -26,6 +28,7 @@ const content = getToolContent(tool.contentKey);
   description={tool.description}
   canonicalPath={`/${tool.slug}/`}
   noindex={!tool.indexable}
+  allowAds={tool.sensitivity === 'general'}
 >
   <div class="container tool-page">
     <Breadcrumbs
@@ -70,6 +73,12 @@ const content = getToolContent(tool.contentKey);
     </section>
 
     <RelatedTools relatedIds={tool.relatedIds} />
+
+    {
+      tool.sensitivity === 'general' && (
+        <AdSlot slotId={ADSENSE_SLOTS.generalToolBottom} minHeightPx={100} />
+      )
+    }
   </div>
 </BaseLayout>
 

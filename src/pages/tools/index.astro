@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import { ADSENSE_SLOTS } from '@/config/flags';
 import { getActiveTools, type ToolCategory } from '@/config/registry';
 
 const tools = getActiveTools('en');
@@ -44,6 +46,8 @@ const categories: Array<{ key: ToolCategory; title: string }> = [
         );
       })
     }
+
+    <AdSlot slotId={ADSENSE_SLOTS.directoryBanner} minHeightPx={100} />
   </div>
 </BaseLayout>
 

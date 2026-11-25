@@ -30,6 +30,13 @@ corepack pnpm dev
 - `corepack pnpm check:build` — Verify static build output and asset budgets
 - `corepack pnpm test:e2e` — Run Playwright end-to-end & accessibility tests
 
+## Enabling Ads (After AdSense Approval)
+
+Ads are disabled by default (`PUBLIC_ADS_ENABLED=false`) and never load on sensitive workspaces (`sensitivity: 'sensitive'`). Once approved by AdSense:
+
+1. Copy `public/ads.txt.example` to `public/ads.txt` and insert your real publisher ID.
+2. Set `PUBLIC_ADS_ENABLED=true`, `PUBLIC_ADSENSE_CLIENT=ca-pub-...`, and your slot IDs (`PUBLIC_ADSENSE_SLOT_DIRECTORY`, `PUBLIC_ADSENSE_SLOT_GUIDE`, `PUBLIC_ADSENSE_SLOT_TOOL`) in Cloudflare Pages environment variables (see `.env.example`).
+
 ## Project Rules
 
 - All image processing runs locally in the user's browser; never upload user files.

@@ -52,18 +52,51 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <section class="hero">
-    <div class="container hero-inner">
-      <h1>Free Online Image Tools</h1>
-      <p class="hero-copy">
-        Resize dimensions, compress to exact KB limits, convert formats, and remove GPS metadata
-        locally in your browser. Your images stay on your device.
-      </p>
-      <div class="hero-actions">
-        <a href="/fix-image-upload-error/" class="btn btn-primary">Fix upload error</a>
-        <a href="/tools/" class="btn btn-secondary">Explore all tools</a>
+    <div class="container hero-layout">
+      <div class="hero-content">
+        <span class="badge hero-badge">100% Browser-Local · No Server Uploads</span>
+        <h1>Free Online Image Tools</h1>
+        <p class="hero-copy">
+          Resize dimensions, compress to exact KB limits, convert formats, and remove GPS metadata
+          locally in your browser. Your images stay on your device.
+        </p>
+        <div class="hero-actions">
+          <a href="/fix-image-upload-error/" class="btn btn-primary">Fix upload error</a>
+          <a href="/tools/" class="btn btn-secondary">Explore all tools</a>
+        </div>
+        <div class="hero-search">
+          <ToolSearch client:idle tools={searchItems} />
+        </div>
       </div>
-      <div class="hero-search">
-        <ToolSearch client:idle tools={searchItems} />
+
+      <div class="card hero-highlights" aria-label="Key capabilities">
+        <div class="highlight-item">
+          <span class="tool-icon-wrap">
+            <CategoryIcon category="fix" size={18} />
+          </span>
+          <div>
+            <strong>Combined Constraints</strong>
+            <p>Fix format, pixel dimensions, and KB cap together in one pass.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="tool-icon-wrap">
+            <CategoryIcon category="compress" size={18} />
+          </span>
+          <div>
+            <strong>Verified Output Bytes</strong>
+            <p>Inspect actual exported bytes and dimensions before downloading.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="tool-icon-wrap">
+            <CategoryIcon category="privacy" size={18} />
+          </span>
+          <div>
+            <strong>Private by Design</strong>
+            <p>Runs inside your browser Web Worker. Files never leave your device.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -165,14 +198,30 @@ const jsonLd = [
   .hero {
     background-color: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-    padding-block: var(--space-12);
+    padding-block: var(--space-8);
   }
-  .hero-inner {
+  .hero-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .hero {
+      padding-block: var(--space-12);
+    }
+    .hero-layout {
+      grid-template-columns: 1.25fr 0.95fr;
+    }
+  }
+  .hero-content {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--space-4);
-    max-width: 760px;
-    margin-inline: 0;
+  }
+  .hero-badge {
+    padding: 4px 12px;
   }
   h1 {
     margin: 0;
@@ -181,8 +230,9 @@ const jsonLd = [
   }
   .hero-copy {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
     color: var(--color-text-secondary);
+    max-width: 58ch;
   }
   .hero-actions {
     display: flex;
@@ -190,7 +240,31 @@ const jsonLd = [
     gap: var(--space-3);
   }
   .hero-search {
-    margin-top: var(--space-2);
+    width: 100%;
+    max-width: 480px;
+  }
+  .hero-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .highlight-item .tool-icon-wrap {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .highlight-item strong {
+    display: block;
+    font-size: 0.9375rem;
+  }
+  .highlight-item p {
+    margin: 2px 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
   }
   .section {
     padding-block: var(--space-8);

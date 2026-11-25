@@ -1,7 +1,7 @@
 import { EngineError, type FitMode, type SupportedOutputMime } from './contracts';
 import type { DecodedBitmap } from './decode';
 import { computeDrawPlan } from './geometry';
-import { renderToBlob } from './encode';
+import { encodePreparedCanvas, prepareCanvas, type PreparedCanvas } from './encode';
 import type { CropRect } from './contracts';
 
 export interface CompressOptions {
@@ -176,8 +176,8 @@ export async function searchCompressedCandidate(
   }
 
   if (bestFeasible) {
-    // Refine up to 9 binary-search steps between low and high
-    for (let i = 0; i < 9; i++) {
+    // Refine up to 7 binary-search steps between low and high
+    for (let i = 0; i < 7; i++) {
       checkAborted(signal, deadline);
       if (high - low < 0.02) break;
       const mid = Math.round(((low + high) / 2) * 100) / 100;
@@ -324,16 +324,25 @@ export async function compressDecodedImage(
   decoded: DecodedBitmap,
   options: CompressOptions
 ): Promise<CompressOutcome> {
+  // Cache prepared canvas per (width, height) so quality binary-search trials skip redundant resampling
+  const canvasCache = new Map<string, PreparedCanvas>();
+
   const encodeTrial: EncodeTrialFn = async (width, height, quality) => {
-    const plan = computeDrawPlan(
-      decoded.width,
-      decoded.height,
-      width,
-      height,
-      options.fit,
-      options.crop
-    );
-    return renderToBlob(decoded, plan, options.format, quality, options.matteColor);
+    const key = `${width}x${height}`;
+    let canvas = canvasCache.get(key);
+    if (!canvas) {
+      const plan = computeDrawPlan(
+        decoded.width,
+        decoded.height,
+        width,
+        height,
+        options.fit,
+        options.crop
+      );
+      canvas = prepareCanvas(decoded, plan, options.format, options.matteColor);
+      canvasCache.set(key, canvas);
+    }
+    return encodePreparedCanvas(canvas, options.format, quality);
   };
 
   return searchCompressedCandidate(encodeTrial, options);

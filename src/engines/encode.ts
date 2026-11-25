@@ -3,13 +3,14 @@ import type { DecodedBitmap } from './decode';
 import type { DrawPlan } from './geometry';
 import { detectMimeFromBytes } from './inspect';
 
-export async function renderToBlob(
+export type PreparedCanvas = OffscreenCanvas | HTMLCanvasElement;
+
+export function prepareCanvas(
   decoded: DecodedBitmap,
   plan: DrawPlan,
   format: SupportedOutputMime,
-  quality?: number,
   matteColor = '#ffffff'
-): Promise<Blob> {
+): PreparedCanvas {
   const { canvasWidth, canvasHeight } = plan;
 
   if (typeof OffscreenCanvas !== 'undefined') {
@@ -18,31 +19,8 @@ export async function renderToBlob(
     if (!ctx) {
       throw new EngineError('ENCODER_UNAVAILABLE', '2D canvas context is unavailable.');
     }
-    if (format === 'image/jpeg') {
-      ctx.fillStyle = matteColor;
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    } else {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    }
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(
-      decoded.source,
-      plan.sx,
-      plan.sy,
-      plan.sw,
-      plan.sh,
-      plan.dx,
-      plan.dy,
-      plan.dw,
-      plan.dh
-    );
-
-    const blob = await canvas.convertToBlob({
-      type: format,
-      ...(format !== 'image/png' && quality !== undefined ? { quality } : {}),
-    });
-    return verifyEncodedFormat(blob, format);
+    drawOntoContext(ctx, decoded, plan, format, matteColor);
+    return canvas;
   }
 
   if (typeof document !== 'undefined') {
@@ -53,43 +31,80 @@ export async function renderToBlob(
     if (!ctx) {
       throw new EngineError('ENCODER_UNAVAILABLE', '2D canvas context is unavailable.');
     }
-    if (format === 'image/jpeg') {
-      ctx.fillStyle = matteColor;
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    } else {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    }
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(
-      decoded.source,
-      plan.sx,
-      plan.sy,
-      plan.sw,
-      plan.sh,
-      plan.dx,
-      plan.dy,
-      plan.dw,
-      plan.dh
-    );
+    drawOntoContext(ctx, decoded, plan, format, matteColor);
+    return canvas;
+  }
 
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (result) => {
-          if (!result) {
-            reject(new EngineError('EXPORT_FAILED', 'Canvas failed to export image blob.'));
-            return;
-          }
-          resolve(result);
-        },
-        format,
-        format !== 'image/png' ? quality : undefined
-      );
+  throw new EngineError('ENCODER_UNAVAILABLE', 'No canvas encoder is available in this environment.');
+}
+
+function drawOntoContext(
+  ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  decoded: DecodedBitmap,
+  plan: DrawPlan,
+  format: SupportedOutputMime,
+  matteColor: string
+) {
+  if (format === 'image/jpeg') {
+    ctx.fillStyle = matteColor;
+    ctx.fillRect(0, 0, plan.canvasWidth, plan.canvasHeight);
+  } else {
+    ctx.clearRect(0, 0, plan.canvasWidth, plan.canvasHeight);
+  }
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(
+    decoded.source,
+    plan.sx,
+    plan.sy,
+    plan.sw,
+    plan.sh,
+    plan.dx,
+    plan.dy,
+    plan.dw,
+    plan.dh
+  );
+}
+
+export async function encodePreparedCanvas(
+  canvas: PreparedCanvas,
+  format: SupportedOutputMime,
+  quality?: number
+): Promise<Blob> {
+  if (typeof OffscreenCanvas !== 'undefined' && canvas instanceof OffscreenCanvas) {
+    const blob = await canvas.convertToBlob({
+      type: format,
+      ...(format !== 'image/png' && quality !== undefined ? { quality } : {}),
     });
     return verifyEncodedFormat(blob, format);
   }
 
-  throw new EngineError('ENCODER_UNAVAILABLE', 'No canvas encoder is available in this environment.');
+  const htmlCanvas = canvas as HTMLCanvasElement;
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    htmlCanvas.toBlob(
+      (result) => {
+        if (!result) {
+          reject(new EngineError('EXPORT_FAILED', 'Canvas failed to export image blob.'));
+          return;
+        }
+        resolve(result);
+      },
+      format,
+      format !== 'image/png' ? quality : undefined
+    );
+  });
+  return verifyEncodedFormat(blob, format);
+}
+
+export async function renderToBlob(
+  decoded: DecodedBitmap,
+  plan: DrawPlan,
+  format: SupportedOutputMime,
+  quality?: number,
+  matteColor = '#ffffff'
+): Promise<Blob> {
+  const canvas = prepareCanvas(decoded, plan, format, matteColor);
+  return encodePreparedCanvas(canvas, format, quality);
 }
 
 async function verifyEncodedFormat(blob: Blob, expectedMime: SupportedOutputMime): Promise<Blob> {

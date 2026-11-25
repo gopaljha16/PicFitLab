@@ -32,6 +32,10 @@ export class ImageJobManager {
     return this.worker;
   }
 
+  warmup(): void {
+    this.ensureWorker();
+  }
+
   cancelActive(): void {
     if (!this.activeJobId) return;
     if (this.worker) {

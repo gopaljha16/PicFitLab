@@ -2,6 +2,13 @@
 
 All notable changes to PicFitLab will be documented in this file.
 
+## [0.5.2] - 2026-11-25
+
+### Performance
+- Reused a single prepared `OffscreenCanvas` / `HTMLCanvasElement` per `(width, height)` across quality binary-search trials in `compress.ts` and `encode.ts`, eliminating redundant resampling passes.
+- Added `ImageJobManager.warmup()` on file selection so the Web Worker is ready before processing starts.
+- Enabled Astro hover `prefetch` and `inlineStylesheets: 'always'` in `astro.config.mjs` to eliminate render-blocking CSS requests and speed up tool navigation.
+
 ## [0.5.1] - 2026-11-25
 
 ### Fixed & Improved

@@ -9,6 +9,12 @@ export default defineConfig({
   site: 'https://picfitlab.com',
   output: 'static',
   trailingSlash: 'always',
+  prefetch: {
+    defaultStrategy: 'hover',
+  },
+  build: {
+    inlineStylesheets: 'always',
+  },
   integrations: [
     react(),
     sitemap({

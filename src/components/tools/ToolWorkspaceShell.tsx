@@ -118,6 +118,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     setStage('validating');
 
     try {
+      managerRef.current?.warmup();
       const budget = detectDeviceBudget();
       const info = await inspectImageBlob(file, file.name, budget);
       setSelectedFile(file);

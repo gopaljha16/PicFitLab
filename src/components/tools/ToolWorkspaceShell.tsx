@@ -10,9 +10,14 @@ import {
 import {
   AlertCircle,
   CheckCircle2,
+  Crop,
   Download,
+  FileImage,
+  Maximize2,
+  Minimize2,
   RotateCcw,
   ShieldCheck,
+  ShieldOff,
   Sliders,
   Upload,
   XCircle,
@@ -131,7 +136,6 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         setCropH(String(info.height));
       }
 
-      // Pre-fill dimensions on free resize tool when no preset dimensions exist
       if (
         tool.engine === 'resize' &&
         tool.id !== 'crop-image' &&
@@ -339,6 +343,11 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     return `${inspection.width / d}:${inspection.height / d}`;
   }, [inspection]);
 
+  const showDimensionsPanel = (tool.engine === 'resize' || tool.engine === 'fix') && tool.id !== 'crop-image';
+  const showCropPanel = tool.id === 'crop-image';
+  const showCompressionPanel = tool.engine === 'compress' || tool.engine === 'fix';
+  const showFormatPanel = tool.engine !== 'inspect' && tool.engine !== 'metadata';
+
   return (
     <section
       aria-label={`${tool.shortLabel} workspace`}
@@ -358,7 +367,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
         style={{
-          border: `2px dashed ${isDragging ? 'var(--color-primary)' : 'var(--color-border)'}`,
+          border: `2px dashed ${isDragging ? 'var(--color-primary-btn)' : 'var(--color-border)'}`,
           borderRadius: 'var(--radius-md)',
           padding: '24px 16px',
           textAlign: 'center',
@@ -385,6 +394,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
             className="btn btn-primary"
             onClick={() => inputRef.current?.click()}
           >
+            <Upload size={16} aria-hidden="true" />
             Choose image
           </button>
           {selectedFile && (
@@ -433,7 +443,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         <div
           style={{
             marginTop: '16px',
-            padding: '12px',
+            padding: '12px 16px',
             borderRadius: 'var(--radius-sm)',
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
@@ -467,16 +477,11 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       )}
 
       {tool.engine === 'inspect' && inspection && (
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '16px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)',
-            backgroundColor: 'var(--color-surface)',
-          }}
-        >
-          <h3 style={{ margin: '0 0 12px', fontSize: '1rem' }}>Detailed Image Report</h3>
+        <div className="ws-panel" style={{ marginTop: '16px' }}>
+          <h3 className="ws-panel-title">
+            <FileImage size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+            Detailed Image Report
+          </h3>
           <dl
             style={{
               display: 'grid',
@@ -514,31 +519,46 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         </div>
       )}
 
-      {tool.engine !== 'inspect' && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginTop: '20px',
-          }}
-        >
-          {(tool.engine === 'resize' || tool.engine === 'fix') && tool.id !== 'crop-image' && (
-            <>
+      {tool.engine === 'metadata' && (
+        <div className="ws-panel" style={{ marginTop: '16px' }}>
+          <h3 className="ws-panel-title">
+            <ShieldOff size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+            Metadata &amp; GPS Stripping
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            Re-encodes the image pixels locally in your browser to strip targeted EXIF camera tags
+            and GPS coordinates, then verifies the output file.
+          </p>
+        </div>
+      )}
+
+      {tool.engine !== 'inspect' && tool.engine !== 'metadata' && (
+        <div className="ws-section-grid">
+          {showDimensionsPanel && (
+            <div className="ws-panel">
+              <h3 className="ws-panel-title">
+                <Maximize2 size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                Dimensions &amp; Fit
+              </h3>
               {tool.id === 'resize-image' && inspection?.width && inspection?.height && (
-                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.875rem', alignSelf: 'center' }}>
-                    Quick presets:
-                  </span>
-                  <button type="button" className="btn btn-secondary" onClick={() => applyScalePreset(0.5)}>
+                <div className="ws-presets">
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => applyScalePreset(0.5)}
+                  >
                     50%
                   </button>
-                  <button type="button" className="btn btn-secondary" onClick={() => applyScalePreset(0.75)}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => applyScalePreset(0.75)}
+                  >
                     75%
                   </button>
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary ws-preset-btn"
                     onClick={() => {
                       setWidth('600');
                       setHeight('600');
@@ -548,7 +568,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                   </button>
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary ws-preset-btn"
                     onClick={() => {
                       setWidth('1080');
                       setHeight('1080');
@@ -558,108 +578,98 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                   </button>
                 </div>
               )}
-              <div>
-                <label htmlFor="ctrl-width" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Width (px)
-                </label>
-                <input
-                  id="ctrl-width"
-                  type="number"
-                  min={1}
-                  max={8192}
-                  value={width}
-                  onChange={(e) => onWidthChange(e.target.value)}
-                  placeholder="Auto"
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
+              <div className="ws-row">
+                <div className="ws-field">
+                  <label htmlFor="ctrl-width" className="ws-label">
+                    Width (px)
+                  </label>
+                  <input
+                    id="ctrl-width"
+                    type="number"
+                    min={1}
+                    max={8192}
+                    value={width}
+                    onChange={(e) => onWidthChange(e.target.value)}
+                    placeholder="Auto"
+                    className="ws-input"
+                  />
+                </div>
+                <div className="ws-field">
+                  <label htmlFor="ctrl-height" className="ws-label">
+                    Height (px)
+                  </label>
+                  <input
+                    id="ctrl-height"
+                    type="number"
+                    min={1}
+                    max={8192}
+                    value={height}
+                    onChange={(e) => onHeightChange(e.target.value)}
+                    placeholder="Auto"
+                    className="ws-input"
+                  />
+                </div>
+                <div className="ws-field">
+                  <label htmlFor="ctrl-fit" className="ws-label">
+                    Fit mode
+                  </label>
+                  <select
+                    id="ctrl-fit"
+                    value={fit}
+                    onChange={(e) => setFit(e.target.value as FitMode)}
+                    className="ws-input"
+                  >
+                    <option value="cover">Cover (crop)</option>
+                    <option value="contain">Contain (pad)</option>
+                    <option value="stretch">Stretch</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label htmlFor="ctrl-height" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Height (px)
-                </label>
-                <input
-                  id="ctrl-height"
-                  type="number"
-                  min={1}
-                  max={8192}
-                  value={height}
-                  onChange={(e) => onHeightChange(e.target.value)}
-                  placeholder="Auto"
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
-              </div>
-              <div>
-                <label htmlFor="ctrl-fit" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Fit mode
-                </label>
-                <select
-                  id="ctrl-fit"
-                  value={fit}
-                  onChange={(e) => setFit(e.target.value as FitMode)}
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                >
-                  <option value="cover">Cover (crop to fill)</option>
-                  <option value="contain">Contain (pad to fit)</option>
-                  <option value="stretch">Stretch (distort)</option>
-                </select>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', paddingTop: '24px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <div className="ws-checkbox-row">
+                <label className="ws-checkbox">
                   <input
                     type="checkbox"
                     checked={aspectLock}
                     onChange={(e) => setAspectLock(e.target.checked)}
-                    style={{ width: '18px', height: '18px' }}
                   />
                   <span>Lock aspect ratio</span>
                 </label>
               </div>
-            </>
+            </div>
           )}
 
-          {tool.id === 'crop-image' && (
-            <>
-              <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: 600, fontSize: '0.875rem', alignSelf: 'center' }}>
-                  Aspect presets:
-                </span>
-                <button type="button" className="btn btn-secondary" onClick={() => applyCropRatio(1, 1)}>
+          {showCropPanel && (
+            <div className="ws-panel">
+              <h3 className="ws-panel-title">
+                <Crop size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                Crop Bounds
+              </h3>
+              <div className="ws-presets">
+                <button
+                  type="button"
+                  className="btn btn-secondary ws-preset-btn"
+                  onClick={() => applyCropRatio(1, 1)}
+                >
                   1:1 Square
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={() => applyCropRatio(4, 3)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary ws-preset-btn"
+                  onClick={() => applyCropRatio(4, 3)}
+                >
                   4:3
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={() => applyCropRatio(16, 9)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary ws-preset-btn"
+                  onClick={() => applyCropRatio(16, 9)}
+                >
                   16:9
                 </button>
                 {inspection?.width && inspection?.height && (
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary ws-preset-btn"
                     onClick={() => {
                       setCropX('0');
                       setCropY('0');
@@ -671,105 +681,76 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                   </button>
                 )}
               </div>
-              <div>
-                <label htmlFor="crop-x" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Crop X (px)
-                </label>
-                <input
-                  id="crop-x"
-                  type="number"
-                  min={0}
-                  value={cropX}
-                  onChange={(e) => setCropX(e.target.value)}
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
+              <div className="ws-row">
+                <div className="ws-field">
+                  <label htmlFor="crop-x" className="ws-label">
+                    X (px)
+                  </label>
+                  <input
+                    id="crop-x"
+                    type="number"
+                    min={0}
+                    value={cropX}
+                    onChange={(e) => setCropX(e.target.value)}
+                    className="ws-input"
+                  />
+                </div>
+                <div className="ws-field">
+                  <label htmlFor="crop-y" className="ws-label">
+                    Y (px)
+                  </label>
+                  <input
+                    id="crop-y"
+                    type="number"
+                    min={0}
+                    value={cropY}
+                    onChange={(e) => setCropY(e.target.value)}
+                    className="ws-input"
+                  />
+                </div>
+                <div className="ws-field">
+                  <label htmlFor="crop-w" className="ws-label">
+                    Width (px)
+                  </label>
+                  <input
+                    id="crop-w"
+                    type="number"
+                    min={1}
+                    value={cropW}
+                    onChange={(e) => setCropW(e.target.value)}
+                    className="ws-input"
+                  />
+                </div>
+                <div className="ws-field">
+                  <label htmlFor="crop-h" className="ws-label">
+                    Height (px)
+                  </label>
+                  <input
+                    id="crop-h"
+                    type="number"
+                    min={1}
+                    value={cropH}
+                    onChange={(e) => setCropH(e.target.value)}
+                    className="ws-input"
+                  />
+                </div>
               </div>
-              <div>
-                <label htmlFor="crop-y" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Crop Y (px)
-                </label>
-                <input
-                  id="crop-y"
-                  type="number"
-                  min={0}
-                  value={cropY}
-                  onChange={(e) => setCropY(e.target.value)}
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
-              </div>
-              <div>
-                <label htmlFor="crop-w" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Crop Width (px)
-                </label>
-                <input
-                  id="crop-w"
-                  type="number"
-                  min={1}
-                  value={cropW}
-                  onChange={(e) => setCropW(e.target.value)}
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
-              </div>
-              <div>
-                <label htmlFor="crop-h" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Crop Height (px)
-                </label>
-                <input
-                  id="crop-h"
-                  type="number"
-                  min={1}
-                  value={cropH}
-                  onChange={(e) => setCropH(e.target.value)}
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
-              </div>
-            </>
+            </div>
           )}
 
-          {(tool.engine === 'compress' || tool.engine === 'fix') && (
-            <>
+          {showCompressionPanel && (
+            <div className="ws-panel">
+              <h3 className="ws-panel-title">
+                <Minimize2 size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                File Size Target
+              </h3>
               {tool.id === 'compress-image-to-kb' && (
-                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.875rem', alignSelf: 'center' }}>
-                    Target presets:
-                  </span>
+                <div className="ws-presets">
                   {[20, 50, 100, 200, 500].map((kb) => (
                     <button
                       key={kb}
                       type="button"
-                      className="btn btn-secondary"
+                      className="btn btn-secondary ws-preset-btn"
                       onClick={() => setMaxKb(String(kb))}
                     >
                       {kb} KB
@@ -777,122 +758,114 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                   ))}
                 </div>
               )}
-              <div>
-                <label htmlFor="ctrl-max-kb" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Target max size (KB, 1 KB = 1,000 B)
-                </label>
-                <input
-                  id="ctrl-max-kb"
-                  type="number"
-                  min={1}
-                  max={20000}
-                  value={maxKb}
-                  onChange={(e) => setMaxKb(e.target.value)}
-                  placeholder="Optional"
-                  style={{
-                    width: '100%',
-                    minHeight: '44px',
-                    marginTop: '4px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
-                  }}
-                />
-              </div>
-              {tool.engine === 'fix' && (
-                <div>
-                  <label htmlFor="ctrl-qfloor" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                    Quality floor ({qualityFloor}%)
+              <div className="ws-row">
+                <div className="ws-field">
+                  <label htmlFor="ctrl-max-kb" className="ws-label">
+                    Max size (KB · 1,000 B)
                   </label>
                   <input
-                    id="ctrl-qfloor"
-                    type="range"
-                    min={10}
-                    max={80}
-                    value={qualityFloor}
-                    onChange={(e) => setQualityFloor(Number(e.target.value))}
-                    style={{ width: '100%', minHeight: '44px', marginTop: '4px' }}
+                    id="ctrl-max-kb"
+                    type="number"
+                    min={1}
+                    max={20000}
+                    value={maxKb}
+                    onChange={(e) => setMaxKb(e.target.value)}
+                    placeholder="Optional"
+                    className="ws-input"
                   />
                 </div>
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', paddingTop: '24px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                {tool.engine === 'fix' && (
+                  <div className="ws-field">
+                    <label htmlFor="ctrl-qfloor" className="ws-label">
+                      Quality floor ({qualityFloor}%)
+                    </label>
+                    <input
+                      id="ctrl-qfloor"
+                      type="range"
+                      min={10}
+                      max={80}
+                      value={qualityFloor}
+                      onChange={(e) => setQualityFloor(Number(e.target.value))}
+                      style={{ width: '100%', minHeight: '44px' }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="ws-checkbox-row">
+                <label className="ws-checkbox">
                   <input
                     type="checkbox"
                     checked={allowDownscale}
                     onChange={(e) => setAllowDownscale(e.target.checked)}
-                    style={{ width: '18px', height: '18px' }}
                   />
                   <span>Allow downscale if needed</span>
                 </label>
               </div>
-            </>
-          )}
-
-          {tool.engine !== 'metadata' && (
-            <div>
-              <label htmlFor="ctrl-format" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                Output format
-              </label>
-              <select
-                id="ctrl-format"
-                value={format}
-                onChange={(e) => setFormat(e.target.value as SupportedOutputMime)}
-                style={{
-                  width: '100%',
-                  minHeight: '44px',
-                  marginTop: '4px',
-                  padding: '8px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-bg)',
-                }}
-              >
-                <option value="image/jpeg">JPEG (.jpg)</option>
-                <option value="image/png">PNG (.png)</option>
-                <option value="image/webp">WebP (.webp)</option>
-              </select>
             </div>
           )}
 
-          {tool.engine !== 'metadata' && format !== 'image/png' && (
-            <div>
-              <label htmlFor="ctrl-quality" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                Quality ({quality}%)
-              </label>
-              <input
-                id="ctrl-quality"
-                type="range"
-                min={10}
-                max={100}
-                value={quality}
-                onChange={(e) => setQuality(Number(e.target.value))}
-                style={{ width: '100%', minHeight: '44px', marginTop: '4px' }}
-              />
-            </div>
-          )}
+          {showFormatPanel && (
+            <div className="ws-panel">
+              <h3 className="ws-panel-title">
+                <FileImage size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                Output Format &amp; Quality
+              </h3>
+              <div className="ws-row">
+                <div className="ws-field">
+                  <label htmlFor="ctrl-format" className="ws-label">
+                    Format
+                  </label>
+                  <select
+                    id="ctrl-format"
+                    value={format}
+                    onChange={(e) => setFormat(e.target.value as SupportedOutputMime)}
+                    className="ws-input"
+                  >
+                    <option value="image/jpeg">JPEG (.jpg)</option>
+                    <option value="image/png">PNG (.png)</option>
+                    <option value="image/webp">WebP (.webp)</option>
+                  </select>
+                </div>
 
-          {tool.engine !== 'metadata' && format === 'image/jpeg' && (
-            <div>
-              <label htmlFor="ctrl-matte" style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem' }}>
-                Background matte (for transparency)
-              </label>
-              <input
-                id="ctrl-matte"
-                type="color"
-                value={matteColor}
-                onChange={(e) => setMatteColor(e.target.value)}
-                style={{
-                  width: '64px',
-                  height: '44px',
-                  marginTop: '4px',
-                  padding: '2px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: 'var(--color-bg)',
-                }}
-              />
+                {format !== 'image/png' && (
+                  <div className="ws-field">
+                    <label htmlFor="ctrl-quality" className="ws-label">
+                      Quality ({quality}%)
+                    </label>
+                    <input
+                      id="ctrl-quality"
+                      type="range"
+                      min={10}
+                      max={100}
+                      value={quality}
+                      onChange={(e) => setQuality(Number(e.target.value))}
+                      style={{ width: '100%', minHeight: '44px' }}
+                    />
+                  </div>
+                )}
+
+                {format === 'image/jpeg' && (
+                  <div className="ws-field">
+                    <label htmlFor="ctrl-matte" className="ws-label">
+                      Matte ({matteColor.toUpperCase()})
+                    </label>
+                    <input
+                      id="ctrl-matte"
+                      type="color"
+                      value={matteColor}
+                      onChange={(e) => setMatteColor(e.target.value)}
+                      style={{
+                        width: '100%',
+                        height: '44px',
+                        padding: '4px',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'var(--color-bg)',
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

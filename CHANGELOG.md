@@ -2,6 +2,14 @@
 
 All notable changes to PicFitLab will be documented in this file.
 
+## [0.5.3] - 2026-11-25
+
+### Fixed & Improved
+- Fixed dark-mode primary button contrast (`--color-primary-btn: #2563eb`) so white button text is crisp in both light and dark modes.
+- Redesigned `ToolWorkspaceShell.tsx` control layout into aligned `.ws-section-grid` / `.ws-panel` / `.ws-row` panels with Lucide section icons (`Maximize2`, `Minimize2`, `FileImage`, `Crop`, `ShieldOff`).
+- Added self-hosted category SVG icons (`CategoryIcon.astro`) across Homepage and Tool Directory cards, plus styled FAQ accordions on tool pages.
+- Expanded Playwright E2E suite (`tests/e2e/tools.spec.ts`) to 16 tests covering all tool engines across Desktop Chrome and Mobile Chrome.
+
 ## [0.5.2] - 2026-11-25
 
 ### Performance

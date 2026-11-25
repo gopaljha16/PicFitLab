@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import CategoryIcon from '@/components/site/CategoryIcon.astro';
 import ToolSearch from '@/components/tools/ToolSearch';
 import RecentTools from '@/components/tools/RecentTools';
 import { getActiveTools, getToolById } from '@/config/registry';
@@ -75,7 +76,12 @@ const jsonLd = [
       {
         popularTools.map((tool) => (
           <a href={`/${tool.slug}/`} class="card tool-card">
-            <span class="badge">{tool.category}</span>
+            <div class="tool-card-top">
+              <span class="tool-icon-wrap">
+                <CategoryIcon category={tool.engine === 'inspect' ? 'inspect' : tool.category} size={18} />
+              </span>
+              <span class="badge">{tool.category}</span>
+            </div>
             <h3>{tool.shortLabel}</h3>
             <p>{tool.summary}</p>
           </a>
@@ -207,6 +213,22 @@ const jsonLd = [
   .tool-card:hover {
     border-color: var(--color-primary);
     text-decoration: none;
+  }
+  .tool-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .tool-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
   }
   .tool-card h3 {
     margin: 0;

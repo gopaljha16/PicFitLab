@@ -1,6 +1,8 @@
 :root {
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
+  --color-primary-btn: #2563eb;
+  --color-primary-btn-hover: #1d4ed8;
   --color-primary-soft: #eff6ff;
   --color-accent: #0d9488;
   --color-accent-soft: #f0fdfa;
@@ -47,6 +49,8 @@
   :root {
     --color-primary: #60a5fa;
     --color-primary-hover: #93c5fd;
+    --color-primary-btn: #2563eb;
+    --color-primary-btn-hover: #1d4ed8;
     --color-primary-soft: #1e3a8a;
     --color-accent: #2dd4bf;
     --color-accent-soft: #134e4a;

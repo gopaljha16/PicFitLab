@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import CategoryIcon from '@/components/site/CategoryIcon.astro';
 import AdSlot from '@/components/ads/AdSlot.astro';
 import { ADSENSE_SLOTS } from '@/config/flags';
 import { getActiveTools, type ToolCategory } from '@/config/registry';
@@ -33,11 +34,17 @@ const categories: Array<{ key: ToolCategory; title: string }> = [
         if (items.length === 0) return null;
         return (
           <section class="category-section">
-            <h2>{cat.title}</h2>
+            <h2 class="category-heading">
+              <CategoryIcon category={cat.key} size={20} />
+              {cat.title}
+            </h2>
             <div class="tool-grid">
               {items.map((tool) => (
                 <a href={`/${tool.slug}/`} class="card tool-card">
-                  <strong>{tool.shortLabel}</strong>
+                  <div class="tool-card-head">
+                    <CategoryIcon category={tool.engine === 'inspect' ? 'inspect' : tool.category} size={16} />
+                    <strong>{tool.shortLabel}</strong>
+                  </div>
                   <p>{tool.summary}</p>
                 </a>
               ))}
@@ -60,6 +67,21 @@ const categories: Array<{ key: ToolCategory; title: string }> = [
   }
   .category-section {
     margin-top: var(--space-8);
+  }
+  .category-heading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  .tool-card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-primary);
+  }
+  .tool-card-head strong {
+    color: var(--color-text);
   }
   .tool-grid {
     display: grid;

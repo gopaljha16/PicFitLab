@@ -30,7 +30,7 @@ const content = getToolContent(tool.contentKey);
   noindex={!tool.indexable}
   allowAds={tool.sensitivity === 'general'}
 >
-  <div class="container tool-page">
+  <div class="container py-6 md:py-8">
     <Breadcrumbs
       items={[
         { label: 'Home', href: '/' },
@@ -39,11 +39,15 @@ const content = getToolContent(tool.contentKey);
       ]}
     />
 
-    <h1>{tool.h1}</h1>
-    <p class="tool-intro">{tool.summary}</p>
+    <h1 class="mb-2 mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      {tool.h1}
+    </h1>
+    <p class="m-0 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+      {tool.summary}
+    </p>
 
     <noscript>
-      <p class="card noscript-note">
+      <p class="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
         JavaScript is required to run local browser image processing. Enable JavaScript to use this
         tool.
       </p>
@@ -51,22 +55,32 @@ const content = getToolContent(tool.contentKey);
 
     <ToolWorkspaceShell client:load tool={tool} />
 
-    <section class="tool-guidance">
-      <h2>How to use {tool.shortLabel}</h2>
-      <ol>
+    <section class="mt-10 max-w-3xl space-y-4">
+      <h2 class="m-0 text-lg font-semibold tracking-tight text-foreground">
+        How to use {tool.shortLabel}
+      </h2>
+      <ol class="m-0 space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
         {content.howTo.map((step) => <li>{step}</li>)}
       </ol>
-      {content.notes.map((note) => <p class="privacy-note">{note}</p>)}
+      {
+        content.notes.map((note) => (
+          <p class="m-0 text-sm leading-relaxed text-muted-foreground">{note}</p>
+        ))
+      }
       {
         content.faq.length > 0 && (
-          <div class="faq-block">
-            <h3>Frequently asked questions</h3>
-            {content.faq.map((item) => (
-              <details class="faq-item">
-                <summary>{item.q}</summary>
-                <p>{item.a}</p>
-              </details>
-            ))}
+          <div class="pt-4">
+            <h3 class="mb-3 mt-0 text-base font-semibold tracking-tight text-foreground">
+              Frequently asked questions
+            </h3>
+            <div class="space-y-2">
+              {content.faq.map((item) => (
+                <details class="group rounded-lg border border-border bg-card px-4 py-3 text-sm">
+                  <summary class="cursor-pointer font-medium text-foreground">{item.q}</summary>
+                  <p class="mb-0 mt-2 leading-relaxed text-muted-foreground">{item.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
         )
       }
@@ -81,49 +95,3 @@ const content = getToolContent(tool.contentKey);
     }
   </div>
 </BaseLayout>
-
-<style>
-  .tool-page {
-    padding-block: var(--space-4) var(--space-8);
-  }
-  .tool-page h1 {
-    margin: var(--space-2) 0;
-    font-size: clamp(1.5rem, 3vw, 2.125rem);
-  }
-  .tool-intro {
-    margin: 0;
-    color: var(--color-text-secondary);
-    max-width: 720px;
-  }
-  .noscript-note {
-    margin-top: var(--space-4);
-    border-color: var(--color-warning);
-    background-color: var(--color-warning-soft);
-  }
-  .tool-guidance {
-    margin-top: var(--space-8);
-    max-width: 760px;
-  }
-  .privacy-note {
-    color: var(--color-text-secondary);
-    font-size: 0.9375rem;
-  }
-  .faq-block {
-    margin-top: var(--space-6);
-  }
-  .faq-item {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: var(--space-3) var(--space-4);
-    margin-top: var(--space-2);
-    background-color: var(--color-surface);
-  }
-  .faq-item summary {
-    cursor: pointer;
-    font-weight: 600;
-  }
-  .faq-item p {
-    margin: var(--space-2) 0 0;
-    color: var(--color-text-secondary);
-  }
-</style>

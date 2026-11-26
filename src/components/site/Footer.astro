@@ -2,56 +2,22 @@
 import { SITE_CONFIG } from '@/config/flags';
 ---
 
-<footer class="site-footer">
-  <div class="container footer-inner">
-    <div class="footer-brand">
-      <strong>{SITE_CONFIG.name}</strong> — {SITE_CONFIG.tagline}
-      <p class="footer-note">
-        Images are processed locally in your browser. Files are not uploaded to a processing server.
+<footer class="mt-16 border-t border-border bg-muted/30 py-8">
+  <div class="container flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div>
+      <div class="text-sm font-semibold text-foreground">
+        {SITE_CONFIG.name} <span class="font-normal text-muted-foreground">— {SITE_CONFIG.tagline}</span>
+      </div>
+      <p class="mt-1 mb-0 text-xs text-muted-foreground">
+        Images are processed locally in your browser. Files are never uploaded to a server.
       </p>
     </div>
-    <nav aria-label="Footer navigation" class="footer-links">
-      <a href="/tools/">All Tools</a>
-      <a href="/about/">About</a>
-      <a href="/privacy/">Privacy</a>
-      <a href="/terms/">Terms</a>
-      <a href="/contact/">Contact</a>
+    <nav aria-label="Footer navigation" class="flex flex-wrap gap-5 text-sm">
+      <a href="/tools/" class="text-muted-foreground hover:text-foreground no-underline hover:underline">All Tools</a>
+      <a href="/about/" class="text-muted-foreground hover:text-foreground no-underline hover:underline">About</a>
+      <a href="/privacy/" class="text-muted-foreground hover:text-foreground no-underline hover:underline">Privacy</a>
+      <a href="/terms/" class="text-muted-foreground hover:text-foreground no-underline hover:underline">Terms</a>
+      <a href="/contact/" class="text-muted-foreground hover:text-foreground no-underline hover:underline">Contact</a>
     </nav>
   </div>
 </footer>
-
-<style>
-  .site-footer {
-    border-top: 1px solid var(--color-border);
-    background-color: var(--color-surface);
-    padding-block: var(--space-8);
-    margin-top: var(--space-12);
-  }
-
-  .footer-inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    justify-content: space-between;
-  }
-
-  .footer-note {
-    margin: var(--space-1) 0 0;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-  }
-
-  .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-    font-size: 0.875rem;
-  }
-
-  @media (min-width: 768px) {
-    .footer-inner {
-      flex-direction: row;
-      align-items: center;
-    }
-  }
-</style>

@@ -51,112 +51,116 @@ const jsonLd = [
   canonicalPath="/"
   jsonLd={jsonLd}
 >
-  <section class="hero">
-    <!-- animated bg blobs -->
-    <div class="hero-blob hero-blob--1" aria-hidden="true"></div>
-    <div class="hero-blob hero-blob--2" aria-hidden="true"></div>
-
-    <div class="container hero-layout">
-      <!-- LEFT: copy -->
-      <div class="hero-content">
-        <span class="hero-badge">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="#22c55e"/></svg>
-          100% Browser-Local &nbsp;·&nbsp; No Server Uploads
+  <section class="border-b border-border bg-muted/30 py-10 md:py-14">
+    <div class="container grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-10">
+      <div class="flex flex-col items-start gap-5 lg:col-span-7">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs">
+          <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
+          100% Browser-Local · No Server Uploads
         </span>
 
-        <h1>
-          Image Tools That<br/>
-          <span class="hero-h1-accent">Never Leave Your Browser</span>
+        <h1 class="m-0 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
+          Image tools that never leave your browser.
         </h1>
 
-        <p class="hero-copy">
-          Resize, compress to exact KB limits, convert formats, and strip GPS metadata —
-          all processed locally inside a Web Worker. <strong>Your files never touch a server.</strong>
+        <p class="m-0 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          Resize dimensions, compress to exact KB limits, convert formats, and strip GPS metadata
+          inside a local Web Worker. Your files stay on your device.
         </p>
 
-        <div class="hero-trust">
-          <span class="trust-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            No uploads
-          </span>
-          <span class="trust-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m13 2-3 7h7l-9 13 3-8H4z"/></svg>
-            Instant processing
-          </span>
-          <span class="trust-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            Free forever
-          </span>
-          <span class="trust-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Privacy first
-          </span>
-        </div>
-
-        <div class="hero-actions">
-          <a href="/fix-image-upload-error/" class="btn btn-primary hero-cta-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="/fix-image-upload-error/" class="btn btn-primary">
             Fix upload error
           </a>
-          <a href="/tools/" class="btn btn-secondary">Explore all tools</a>
+          <a href="/tools/" class="btn btn-secondary">
+            Explore all {allTools.length} tools
+          </a>
         </div>
 
-        <div class="hero-search">
+        <div class="w-full max-w-md pt-1">
           <ToolSearch client:idle tools={searchItems} />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-xs font-medium text-muted-foreground">
+          <span class="inline-flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Zero server uploads
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m13 2-3 7h7l-9 13 3-8H4z"/></svg>
+            Instant Web Worker processing
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Free &amp; private
+          </span>
         </div>
       </div>
 
-      <!-- RIGHT: visual panel -->
-      <div class="hero-visual" aria-label="Tool preview" aria-hidden="true">
-        <!-- mock browser chrome -->
-        <div class="hv-browser">
-          <div class="hv-browser-bar">
-            <span class="hv-dot" style="background:#ff5f57"></span>
-            <span class="hv-dot" style="background:#febc2e"></span>
-            <span class="hv-dot" style="background:#28c840"></span>
-            <span class="hv-url">picfitlab.com/fix-image-upload-error</span>
-          </div>
-          <div class="hv-browser-body">
-            <div class="hv-report-title">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Verification Report
+      <div class="lg:col-span-5" aria-label="Sample technical verification report">
+        <div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <div class="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-border" aria-hidden="true"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-border" aria-hidden="true"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-border" aria-hidden="true"></span>
+              <span class="ml-1 font-mono text-xs text-muted-foreground">verification-report</span>
             </div>
-            <table class="hv-table">
+            <span class="rounded border border-border bg-background px-2 py-0.5 font-mono text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+              PASS
+            </span>
+          </div>
+
+          <div class="p-4">
+            <table class="w-full border-collapse text-xs">
               <thead>
-                <tr><th>Check</th><th>Input</th><th>Required</th><th>Status</th></tr>
+                <tr class="border-b border-border text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  <th class="pb-2 font-medium">Check</th>
+                  <th class="pb-2 font-medium">Input</th>
+                  <th class="pb-2 font-medium">Target</th>
+                  <th class="pb-2 text-right font-medium">Output</th>
+                </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-border font-mono tabular-nums">
                 <tr>
-                  <td>Format</td><td class="hv-muted">PNG</td><td>JPEG</td>
-                  <td><span class="hv-pass">✓ pass</span></td>
+                  <td class="py-2.5 font-sans font-medium text-foreground">Format</td>
+                  <td class="py-2.5 text-muted-foreground">PNG</td>
+                  <td class="py-2.5 text-muted-foreground">JPEG</td>
+                  <td class="py-2.5 text-right font-medium text-emerald-600 dark:text-emerald-400">JPEG</td>
                 </tr>
                 <tr>
-                  <td>Dimensions</td><td class="hv-muted">1920×1080</td><td>600×600</td>
-                  <td><span class="hv-pass">✓ pass</span></td>
+                  <td class="py-2.5 font-sans font-medium text-foreground">Dimensions</td>
+                  <td class="py-2.5 text-muted-foreground">1920×1080</td>
+                  <td class="py-2.5 text-muted-foreground">600×600</td>
+                  <td class="py-2.5 text-right font-medium text-emerald-600 dark:text-emerald-400">600×600</td>
                 </tr>
                 <tr>
-                  <td>File size</td><td class="hv-muted">2.3 MB</td><td>≤ 50 KB</td>
-                  <td><span class="hv-pass">✓ 48 KB</span></td>
+                  <td class="py-2.5 font-sans font-medium text-foreground">File size</td>
+                  <td class="py-2.5 text-muted-foreground">2.40 MB</td>
+                  <td class="py-2.5 text-muted-foreground">≤ 50 KB</td>
+                  <td class="py-2.5 text-right font-medium text-emerald-600 dark:text-emerald-400">48.6 KB</td>
                 </tr>
                 <tr>
-                  <td>Metadata</td><td class="hv-muted">GPS + EXIF</td><td>stripped</td>
-                  <td><span class="hv-pass">✓ clean</span></td>
+                  <td class="py-2.5 font-sans font-medium text-foreground">Metadata</td>
+                  <td class="py-2.5 text-muted-foreground">EXIF + GPS</td>
+                  <td class="py-2.5 text-muted-foreground">Stripped</td>
+                  <td class="py-2.5 text-right font-medium text-emerald-600 dark:text-emerald-400">Clean</td>
                 </tr>
               </tbody>
             </table>
-            <!-- floating stat cards -->
-            <div class="hv-stats">
-              <div class="hv-stat">
-                <span class="hv-stat-val">17</span>
-                <span class="hv-stat-lbl">Tools</span>
+
+            <div class="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
+              <div class="rounded-md bg-muted/50 px-2 py-2">
+                <div class="font-mono text-base font-semibold tabular-nums text-foreground">{allTools.length}</div>
+                <div class="text-[11px] text-muted-foreground">Local tools</div>
               </div>
-              <div class="hv-stat">
-                <span class="hv-stat-val">0</span>
-                <span class="hv-stat-lbl">Uploads</span>
+              <div class="rounded-md bg-muted/50 px-2 py-2">
+                <div class="font-mono text-base font-semibold tabular-nums text-foreground">0 B</div>
+                <div class="text-[11px] text-muted-foreground">Uploaded</div>
               </div>
-              <div class="hv-stat">
-                <span class="hv-stat-val">∞</span>
-                <span class="hv-stat-lbl">Free</span>
+              <div class="rounded-md bg-muted/50 px-2 py-2">
+                <div class="font-mono text-base font-semibold tabular-nums text-foreground">100%</div>
+                <div class="text-[11px] text-muted-foreground">Verified</div>
               </div>
             </div>
           </div>
@@ -167,71 +171,83 @@ const jsonLd = [
 
   <RecentTools client:idle tools={searchItems} />
 
-  <section class="container section">
-    <h2>Popular tools</h2>
-    <div class="tool-grid">
+  <section class="container py-10">
+    <div class="mb-5 flex items-baseline justify-between gap-4">
+      <h2 class="m-0 text-xl font-semibold tracking-tight text-foreground">Popular tools</h2>
+      <a href="/tools/" class="text-sm font-medium text-muted-foreground hover:text-foreground no-underline hover:underline">
+        View all →
+      </a>
+    </div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {
         popularTools.map((tool) => (
-          <a href={`/${tool.slug}/`} class="card tool-card">
-            <div class="tool-card-top">
-              <span class="tool-icon-wrap">
-                <CategoryIcon category={tool.engine === 'inspect' ? 'inspect' : tool.category} size={18} />
+          <a
+            href={`/${tool.slug}/`}
+            class="group flex flex-col gap-2.5 rounded-lg border border-border bg-card p-4 text-foreground no-underline shadow-xs transition-colors hover:border-foreground/25 hover:bg-accent/30 hover:no-underline"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-muted text-foreground">
+                <CategoryIcon category={tool.engine === 'inspect' ? 'inspect' : tool.category} size={16} />
               </span>
               <span class="badge">{tool.category}</span>
             </div>
-            <h3>{tool.shortLabel}</h3>
-            <p>{tool.summary}</p>
+            <h3 class="m-0 text-sm font-semibold text-foreground">{tool.shortLabel}</h3>
+            <p class="m-0 text-xs leading-relaxed text-muted-foreground">{tool.summary}</p>
           </a>
         ))
       }
     </div>
   </section>
 
-  <section class="container section">
-    <div class="card spotlight">
-      <div>
+  <section class="container py-4">
+    <div class="grid grid-cols-1 items-center gap-6 rounded-xl border border-border bg-card p-6 shadow-xs md:grid-cols-12">
+      <div class="space-y-3 md:col-span-6">
         <span class="badge">Flagship workflow</span>
-        <h2>Upload Error Fixer</h2>
-        <p>
+        <h2 class="m-0 text-xl font-semibold tracking-tight text-foreground">Upload Error Fixer</h2>
+        <p class="m-0 text-sm leading-relaxed text-muted-foreground">
           Portal rejecting your photo? Combine target format, exact pixel dimensions, and maximum KB
           size in one pass, then verify the actual exported file before uploading.
         </p>
-        <a href="/fix-image-upload-error/" class="btn btn-primary">Open Upload Error Fixer</a>
+        <div class="pt-1">
+          <a href="/fix-image-upload-error/" class="btn btn-primary">Open Upload Error Fixer</a>
+        </div>
       </div>
       <div
-        class="spotlight-table-wrap"
+        class="overflow-x-auto rounded-lg border border-border bg-muted/30 p-3 md:col-span-6"
         tabindex="0"
         role="region"
         aria-label="Illustrative technical verification report"
       >
-        <table class="spotlight-table">
-          <caption>Illustrative technical verification report</caption>
+        <table class="w-full border-collapse text-xs">
+          <caption class="mb-2 text-left text-[11px] font-medium text-muted-foreground">
+            Illustrative technical verification report
+          </caption>
           <thead>
-            <tr>
-              <th>Check</th>
-              <th>Input</th>
-              <th>Required</th>
-              <th>Result</th>
+            <tr class="border-b border-border text-left text-muted-foreground">
+              <th class="p-2 font-medium">Check</th>
+              <th class="p-2 font-medium">Input</th>
+              <th class="p-2 font-medium">Required</th>
+              <th class="p-2 font-medium">Result</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-border font-mono tabular-nums">
             <tr>
-              <td>Format</td>
-              <td>PNG</td>
-              <td>JPEG</td>
-              <td>JPEG — pass</td>
+              <td class="p-2 font-sans font-medium text-foreground">Format</td>
+              <td class="p-2 text-muted-foreground">PNG</td>
+              <td class="p-2 text-muted-foreground">JPEG</td>
+              <td class="p-2 text-emerald-600 dark:text-emerald-400">JPEG — pass</td>
             </tr>
             <tr>
-              <td>Dimensions</td>
-              <td>1920×1080</td>
-              <td>600×600</td>
-              <td>600×600 — pass</td>
+              <td class="p-2 font-sans font-medium text-foreground">Dimensions</td>
+              <td class="p-2 text-muted-foreground">1920×1080</td>
+              <td class="p-2 text-muted-foreground">600×600</td>
+              <td class="p-2 text-emerald-600 dark:text-emerald-400">600×600 — pass</td>
             </tr>
             <tr>
-              <td>File size</td>
-              <td>2,400,000 B</td>
-              <td>≤ 50,000 B</td>
-              <td>48,600 B — pass</td>
+              <td class="p-2 font-sans font-medium text-foreground">File size</td>
+              <td class="p-2 text-muted-foreground">2,400,000 B</td>
+              <td class="p-2 text-muted-foreground">≤ 50,000 B</td>
+              <td class="p-2 text-emerald-600 dark:text-emerald-400">48,600 B — pass</td>
             </tr>
           </tbody>
         </table>
@@ -239,376 +255,30 @@ const jsonLd = [
     </div>
   </section>
 
-  <section class="container section">
-    <h2>How local processing works</h2>
-    <div class="steps-grid">
-      <div class="card">
-        <h3>1. Choose an image</h3>
-        <p>Select or drop a local JPG, PNG, or WebP file. Nothing is sent to a remote server.</p>
+  <section class="container py-10">
+    <h2 class="mb-5 mt-0 text-xl font-semibold tracking-tight text-foreground">How local processing works</h2>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div class="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <div class="mb-2 font-mono text-xs font-medium text-muted-foreground">01</div>
+        <h3 class="m-0 text-sm font-semibold text-foreground">Choose an image</h3>
+        <p class="mb-0 mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          Select or drop a local JPG, PNG, or WebP file. Nothing is sent to a remote server.
+        </p>
       </div>
-      <div class="card">
-        <h3>2. Set requirements</h3>
-        <p>Pick pixel dimensions, target file size in KB, output format, or metadata removal.</p>
+      <div class="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <div class="mb-2 font-mono text-xs font-medium text-muted-foreground">02</div>
+        <h3 class="m-0 text-sm font-semibold text-foreground">Set requirements</h3>
+        <p class="mb-0 mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          Pick pixel dimensions, target file size in KB, output format, or metadata removal.
+        </p>
       </div>
-      <div class="card">
-        <h3>3. Verify &amp; download</h3>
-        <p>Inspect the actual output bytes, dimensions, and format before saving to your device.</p>
+      <div class="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <div class="mb-2 font-mono text-xs font-medium text-muted-foreground">03</div>
+        <h3 class="m-0 text-sm font-semibold text-foreground">Verify &amp; download</h3>
+        <p class="mb-0 mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          Inspect the actual output bytes, dimensions, and format before saving to your device.
+        </p>
       </div>
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  /* ===================== HERO ===================== */
-  .hero {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #0f172a 100%);
-    border-bottom: 1px solid rgba(99,102,241,.25);
-    padding-block: var(--space-10);
-  }
-  /* animated gradient blobs */
-  .hero-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: .35;
-    pointer-events: none;
-  }
-  .hero-blob--1 {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, #6366f1 0%, transparent 70%);
-    top: -180px; left: -120px;
-    animation: blob-drift 14s ease-in-out infinite alternate;
-  }
-  .hero-blob--2 {
-    width: 420px; height: 420px;
-    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
-    bottom: -150px; right: -80px;
-    animation: blob-drift 18s ease-in-out infinite alternate-reverse;
-  }
-  @keyframes blob-drift {
-    from { transform: translate(0, 0) scale(1); }
-    to   { transform: translate(30px, 20px) scale(1.08); }
-  }
-
-  .hero-layout {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-8);
-    align-items: center;
-  }
-  @media (min-width: 900px) {
-    .hero { padding-block: var(--space-12); }
-    .hero-layout { grid-template-columns: 1.1fr 1fr; }
-  }
-
-  /* --- badge --- */
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
-    border-radius: 999px;
-    background: rgba(99,102,241,.18);
-    border: 1px solid rgba(99,102,241,.45);
-    color: #a5b4fc;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: .02em;
-    backdrop-filter: blur(4px);
-  }
-
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-5);
-  }
-
-  /* --- headline --- */
-  h1 {
-    margin: 0;
-    font-size: clamp(2rem, 4.5vw, 3rem);
-    line-height: 1.1;
-    color: #f8fafc;
-    font-weight: 800;
-    letter-spacing: -.02em;
-  }
-  .hero-h1-accent {
-    display: block;
-    background: linear-gradient(90deg, #818cf8, #38bdf8 60%, #34d399);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero-copy {
-    margin: 0;
-    font-size: 1.0625rem;
-    color: #94a3b8;
-    max-width: 54ch;
-    line-height: 1.65;
-  }
-  .hero-copy strong { color: #cbd5e1; font-weight: 600; }
-
-  /* --- trust pills --- */
-  .hero-trust {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-  .trust-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.12);
-    color: #94a3b8;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  .trust-pill svg { color: #6ee7b7; flex-shrink: 0; }
-
-  /* --- CTAs --- */
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-  .hero-cta-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, #6366f1, #3b82f6);
-    box-shadow: 0 4px 20px rgba(99,102,241,.45);
-    transition: box-shadow .2s, transform .15s;
-  }
-  .hero-cta-primary:hover {
-    box-shadow: 0 6px 28px rgba(99,102,241,.65);
-    transform: translateY(-1px);
-  }
-  .hero-cta-primary svg { flex-shrink: 0; }
-
-  .hero-search {
-    width: 100%;
-    max-width: 480px;
-  }
-
-  /* ===================== RIGHT: VISUAL PANEL ===================== */
-  .hero-visual {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .hv-browser {
-    width: 100%;
-    max-width: 420px;
-    border-radius: 12px;
-    background: rgba(15,23,42,.85);
-    border: 1px solid rgba(99,102,241,.3);
-    box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(99,102,241,.12);
-    backdrop-filter: blur(12px);
-    overflow: hidden;
-    animation: hv-float 6s ease-in-out infinite;
-  }
-  @keyframes hv-float {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-8px); }
-  }
-
-  .hv-browser-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    background: rgba(255,255,255,.04);
-    border-bottom: 1px solid rgba(255,255,255,.07);
-  }
-  .hv-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .hv-url {
-    margin-left: 8px;
-    font-size: 0.72rem;
-    color: #64748b;
-    font-family: monospace;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .hv-browser-body {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .hv-report-title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: #e2e8f0;
-  }
-
-  .hv-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.775rem;
-  }
-  .hv-table th {
-    text-align: left;
-    padding: 5px 6px;
-    color: #475569;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.65rem;
-    letter-spacing: .05em;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-  .hv-table td {
-    padding: 6px 6px;
-    color: #cbd5e1;
-    border-bottom: 1px solid rgba(255,255,255,.05);
-  }
-  .hv-muted { color: #475569 !important; }
-  .hv-pass {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    color: #4ade80;
-    font-weight: 600;
-    font-size: 0.75rem;
-  }
-
-  .hv-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .hv-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 6px;
-    border-radius: 8px;
-    background: rgba(99,102,241,.12);
-    border: 1px solid rgba(99,102,241,.2);
-  }
-  .hv-stat-val {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #818cf8;
-    line-height: 1;
-  }
-  .hv-stat-lbl {
-    font-size: 0.65rem;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-top: 2px;
-  }
-
-  /* ===================== REST OF PAGE ===================== */
-  .section {
-    padding-block: var(--space-8);
-  }
-  .section h2 {
-    margin-top: 0;
-  }
-  .tool-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--space-4);
-  }
-  .tool-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  .tool-card:hover {
-    border-color: var(--color-primary);
-    text-decoration: none;
-  }
-  .tool-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-  }
-  .tool-icon-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-sm);
-    background-color: var(--color-primary-soft);
-    color: var(--color-primary);
-  }
-  .tool-card h3 {
-    margin: 0;
-    font-size: 1.0625rem;
-  }
-  .tool-card p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-  }
-  .spotlight {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-    align-items: center;
-  }
-  @media (min-width: 768px) {
-    .spotlight {
-      grid-template-columns: 1.1fr 1fr;
-    }
-  }
-  .spotlight-table-wrap {
-    overflow-x: auto;
-  }
-  .spotlight-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-  }
-  .spotlight-table caption {
-    text-align: left;
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-2);
-  }
-  .spotlight-table th,
-  .spotlight-table td {
-    text-align: left;
-    padding: var(--space-2);
-    border-bottom: 1px solid var(--color-border);
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-4);
-  }
-  .steps-grid h3 {
-    margin-top: 0;
-  }
-  .steps-grid p {
-    margin-bottom: 0;
-    color: var(--color-text-secondary);
-  }
-</style>

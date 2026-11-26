@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import type { ToolConfig } from '@/config/registry';
 
 interface ToolSearchProps {
@@ -23,36 +23,19 @@ export default function ToolSearch({ tools }: ToolSearchProps) {
   }, [query, tools]);
 
   return (
-    <div style={{ position: 'relative', maxWidth: '480px', width: '100%' }}>
+    <div className="relative w-full max-w-md">
       <label htmlFor="tool-search-input" className="sr-only">
         Search image tools
       </label>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '0 12px',
-          backgroundColor: 'var(--color-surface-elevated)',
-          minHeight: '44px',
-        }}
-      >
-        <Search size={18} aria-hidden="true" style={{ color: 'var(--color-text-secondary)' }} />
+      <div className="flex min-h-[42px] items-center gap-2 rounded-md border border-input bg-background px-3 shadow-xs transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
+        <Search size={16} aria-hidden="true" className="shrink-0 text-muted-foreground" />
         <input
           id="tool-search-input"
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search tools (e.g. 50 KB, 600x600, PNG to JPG)..."
-          style={{
-            border: 'none',
-            background: 'transparent',
-            width: '100%',
-            outline: 'none',
-            padding: '8px 0',
-          }}
+          className="w-full border-0 bg-transparent py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
       </div>
 
@@ -60,40 +43,29 @@ export default function ToolSearch({ tools }: ToolSearchProps) {
         <div
           role="region"
           aria-label="Search results"
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 4px)',
-            left: 0,
-            right: 0,
-            backgroundColor: 'var(--color-surface-elevated)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: 'var(--shadow-md)',
-            padding: '8px',
-            zIndex: 30,
-          }}
+          className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 rounded-lg border border-border bg-popover p-1.5 shadow-md"
         >
           {filtered.length === 0 ? (
-            <p style={{ margin: '8px', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            <p className="m-0 px-3 py-2 text-sm text-muted-foreground">
               No matching tools found. Try &ldquo;compress&rdquo;, &ldquo;resize&rdquo;, or &ldquo;metadata&rdquo;.
             </p>
           ) : (
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            <ul className="m-0 list-none p-0">
               {filtered.map((tool) => (
                 <li key={tool.id}>
                   <a
                     href={`/${tool.slug}/`}
-                    style={{
-                      display: 'block',
-                      padding: '8px 12px',
-                      borderRadius: 'var(--radius-sm)',
-                      color: 'var(--color-text)',
-                    }}
+                    className="group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-foreground no-underline transition-colors hover:bg-accent hover:no-underline"
                   >
-                    <div style={{ fontWeight: 600 }}>{tool.shortLabel}</div>
-                    <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
-                      {tool.summary}
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-foreground">{tool.shortLabel}</div>
+                      <div className="truncate text-xs text-muted-foreground">{tool.summary}</div>
                     </div>
+                    <ArrowRight
+                      size={14}
+                      aria-hidden="true"
+                      className="shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                    />
                   </a>
                 </li>
               ))}

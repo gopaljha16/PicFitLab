@@ -21,10 +21,12 @@ const categories: Array<{ key: ToolCategory; title: string }> = [
   description="Browse all free, local browser-based image compression, resizing, conversion, and privacy tools on PicFitLab."
   canonicalPath="/tools/"
 >
-  <div class="container page-wrap">
+  <div class="container py-6 md:py-10">
     <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'All Tools' }]} />
-    <h1>All Image Tools</h1>
-    <p class="lead">
+    <h1 class="mb-2 mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      All Image Tools
+    </h1>
+    <p class="m-0 text-sm text-muted-foreground sm:text-base">
       Every tool runs locally in your browser without uploading your images to a server.
     </p>
 
@@ -33,19 +35,24 @@ const categories: Array<{ key: ToolCategory; title: string }> = [
         const items = tools.filter((t) => t.category === cat.key);
         if (items.length === 0) return null;
         return (
-          <section class="category-section">
-            <h2 class="category-heading">
-              <CategoryIcon category={cat.key} size={20} />
+          <section class="mt-10">
+            <h2 class="m-0 flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
+              <CategoryIcon category={cat.key} size={18} />
               {cat.title}
             </h2>
-            <div class="tool-grid">
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {items.map((tool) => (
-                <a href={`/${tool.slug}/`} class="card tool-card">
-                  <div class="tool-card-head">
-                    <CategoryIcon category={tool.engine === 'inspect' ? 'inspect' : tool.category} size={16} />
-                    <strong>{tool.shortLabel}</strong>
+                <a
+                  href={`/${tool.slug}/`}
+                  class="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 text-foreground no-underline shadow-xs transition-colors hover:border-foreground/25 hover:bg-accent/30 hover:no-underline"
+                >
+                  <div class="flex items-center gap-2 text-foreground">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted">
+                      <CategoryIcon category={tool.engine === 'inspect' ? 'inspect' : tool.category} size={15} />
+                    </span>
+                    <strong class="text-sm font-semibold">{tool.shortLabel}</strong>
                   </div>
-                  <p>{tool.summary}</p>
+                  <p class="m-0 text-xs leading-relaxed text-muted-foreground">{tool.summary}</p>
                 </a>
               ))}
             </div>
@@ -57,50 +64,3 @@ const categories: Array<{ key: ToolCategory; title: string }> = [
     <AdSlot slotId={ADSENSE_SLOTS.directoryBanner} minHeightPx={100} />
   </div>
 </BaseLayout>
-
-<style>
-  .page-wrap {
-    padding-block: var(--space-4) var(--space-8);
-  }
-  .lead {
-    color: var(--color-text-secondary);
-  }
-  .category-section {
-    margin-top: var(--space-8);
-  }
-  .category-heading {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin: 0;
-  }
-  .tool-card-head {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-primary);
-  }
-  .tool-card-head strong {
-    color: var(--color-text);
-  }
-  .tool-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--space-4);
-    margin-top: var(--space-3);
-  }
-  .tool-card {
-    display: block;
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  .tool-card:hover {
-    border-color: var(--color-primary);
-    text-decoration: none;
-  }
-  .tool-card p {
-    margin: var(--space-1) 0 0;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-  }
-</style>

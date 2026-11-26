@@ -13,41 +13,67 @@ const navLinks = [
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="site-header">
-  <div class="container header-inner">
-    <a href="/" class="brand" aria-label={`${SITE_CONFIG.name} home`}>
-      <img src="/favicon.svg" alt="" width="28" height="28" />
-      <span class="brand-name">{SITE_CONFIG.name}</span>
+<header class="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+  <div class="container flex h-14 items-center justify-between gap-4">
+    <a
+      href="/"
+      class="inline-flex items-center gap-2.5 text-base font-semibold tracking-tight text-foreground no-underline hover:no-underline"
+      aria-label={`${SITE_CONFIG.name} home`}
+    >
+      <img src="/favicon.svg" alt="" width="24" height="24" class="rounded-md" />
+      <span>{SITE_CONFIG.name}</span>
     </a>
 
-    <nav aria-label="Main navigation" class="desktop-nav">
+    <nav aria-label="Main navigation" class="hidden md:flex items-center gap-1">
       {
-        navLinks.map((link) => (
-          <a
-            href={link.href}
-            class:list={['nav-link', { active: currentPath === link.href }]}
-            aria-current={currentPath === link.href ? 'page' : undefined}
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </nav>
-
-    <details class="mobile-menu" id="mobile-nav-details">
-      <summary class="btn btn-secondary mobile-menu-toggle" aria-label="Toggle menu">
-        Menu
-      </summary>
-      <nav aria-label="Mobile navigation" class="mobile-nav-panel">
-        {
-          navLinks.map((link) => (
+        navLinks.map((link) => {
+          const active = currentPath === link.href;
+          return (
             <a
               href={link.href}
-              class:list={['mobile-nav-link', { active: currentPath === link.href }]}
+              class:list={[
+                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors no-underline hover:no-underline',
+                active
+                  ? 'bg-secondary text-foreground'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+              ]}
+              aria-current={active ? 'page' : undefined}
             >
               {link.label}
             </a>
-          ))
+          );
+        })
+      }
+    </nav>
+
+    <details class="relative md:hidden" id="mobile-nav-details">
+      <summary
+        class="btn btn-secondary list-none px-3 py-1.5 text-xs font-medium min-h-[36px] cursor-pointer [&::-webkit-details-marker]:hidden"
+        aria-label="Toggle menu"
+      >
+        Menu
+      </summary>
+      <nav
+        aria-label="Mobile navigation"
+        class="absolute right-0 top-[calc(100%+8px)] z-50 flex w-56 flex-col gap-1 rounded-lg border border-border bg-popover p-1.5 shadow-md"
+      >
+        {
+          navLinks.map((link) => {
+            const active = currentPath === link.href;
+            return (
+              <a
+                href={link.href}
+                class:list={[
+                  'flex min-h-[40px] items-center rounded-md px-3 py-2 text-sm font-medium no-underline hover:no-underline transition-colors',
+                  active
+                    ? 'bg-secondary text-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                ]}
+              >
+                {link.label}
+              </a>
+            );
+          })
         }
       </nav>
     </details>
@@ -70,109 +96,3 @@ const currentPath = Astro.url.pathname;
     });
   })();
 </script>
-
-<style>
-  .site-header {
-    border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-bg);
-    position: sticky;
-    top: 0;
-    z-index: 40;
-  }
-
-  .header-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
-    min-height: 64px;
-  }
-
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-text);
-    font-weight: 700;
-    font-size: 1.125rem;
-    text-decoration: none;
-  }
-
-  .brand:hover {
-    text-decoration: none;
-  }
-
-  .desktop-nav {
-    display: none;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .nav-link {
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-sm);
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    font-size: 0.9375rem;
-  }
-
-  .nav-link:hover,
-  .nav-link.active {
-    color: var(--color-text);
-    background-color: var(--color-surface);
-    text-decoration: none;
-  }
-
-  .mobile-menu {
-    position: relative;
-  }
-
-  .mobile-menu-toggle {
-    list-style: none;
-    font-size: 0.875rem;
-  }
-
-  .mobile-menu-toggle::-webkit-details-marker {
-    display: none;
-  }
-
-  .mobile-nav-panel {
-    position: absolute;
-    right: 0;
-    top: calc(100% + var(--space-2));
-    width: 220px;
-    background-color: var(--color-surface-elevated);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    padding: var(--space-2);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    z-index: 50;
-  }
-
-  .mobile-nav-link {
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-
-  .mobile-nav-link.active {
-    background-color: var(--color-primary-soft);
-    color: var(--color-primary);
-    font-weight: 600;
-  }
-
-  @media (min-width: 768px) {
-    .desktop-nav {
-      display: flex;
-    }
-    .mobile-menu {
-      display: none;
-    }
-  }
-</style>

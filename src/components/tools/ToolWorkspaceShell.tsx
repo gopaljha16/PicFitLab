@@ -579,6 +579,124 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                   </button>
                 </div>
               )}
+              {tool.id === 'passport-photo-resizer' && (
+                <div className="ws-presets">
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('600');
+                      setHeight('600');
+                      setMaxKb('240');
+                    }}
+                  >
+                    2×2 in (600×600)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('413');
+                      setHeight('531');
+                      setMaxKb('100');
+                    }}
+                  >
+                    35×45 mm (413×531)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('200');
+                      setHeight('200');
+                      setMaxKb('50');
+                    }}
+                  >
+                    200×200 (50 KB)
+                  </button>
+                </div>
+              )}
+              {tool.id === 'signature-resizer' && (
+                <div className="ws-presets">
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('200');
+                      setHeight('80');
+                      setMaxKb('20');
+                    }}
+                  >
+                    200×80 (20 KB)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('140');
+                      setHeight('60');
+                      setMaxKb('20');
+                    }}
+                  >
+                    140×60 (20 KB)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('300');
+                      setHeight('100');
+                      setMaxKb('50');
+                    }}
+                  >
+                    300×100 (50 KB)
+                  </button>
+                </div>
+              )}
+              {tool.id === 'social-media-image-resizer' && (
+                <div className="ws-presets">
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('1080');
+                      setHeight('1080');
+                    }}
+                  >
+                    IG Square (1080×1080)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('1080');
+                      setHeight('1350');
+                    }}
+                  >
+                    IG Portrait (1080×1350)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('1280');
+                      setHeight('720');
+                    }}
+                  >
+                    YouTube (1280×720)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ws-preset-btn"
+                    onClick={() => {
+                      setWidth('1584');
+                      setHeight('396');
+                    }}
+                  >
+                    LinkedIn (1584×396)
+                  </button>
+                </div>
+              )}
               <div className="ws-row">
                 <div className="ws-field">
                   <label htmlFor="ctrl-width" className="ws-label">

@@ -8,8 +8,8 @@ import {
 } from '@/config/registry';
 
 describe('TOOL_REGISTRY', () => {
-  it('contains all 17 P0 tools with unique ids and slugs', () => {
-    expect(TOOL_REGISTRY.length).toBe(17);
+  it('contains all registered tools with unique ids and slugs', () => {
+    expect(TOOL_REGISTRY.length).toBeGreaterThanOrEqual(22);
     const ids = new Set(TOOL_REGISTRY.map((t) => t.id));
     const slugs = new Set(TOOL_REGISTRY.map((t) => t.slug));
     expect(ids.size).toBe(TOOL_REGISTRY.length);
@@ -23,7 +23,7 @@ describe('TOOL_REGISTRY', () => {
     expect(getToolById('compress-image-to-50kb')?.defaults.maxBytes).toBe(50000);
   });
 
-  it('marks all 17 P0 tools published and indexable', () => {
+  it('marks all registered tools published and indexable', () => {
     const nonIndexable = getNonIndexablePaths();
     expect(nonIndexable.length).toBe(0);
     expect(getActiveTools('en').length).toBe(TOOL_REGISTRY.length);

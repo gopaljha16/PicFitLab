@@ -49,6 +49,13 @@ export interface CropRect {
   height: number;
 }
 
+export interface TransformOptions {
+  rotateDeg?: 0 | 90 | 180 | 270;
+  flipH?: boolean;
+  flipV?: boolean;
+  cornerRadius?: 'circle' | number;
+}
+
 export interface JobConstraints {
   width?: number;
   height?: number;
@@ -63,6 +70,8 @@ export interface JobConstraints {
   matteColor?: string;
   crop?: CropRect;
   stripMetadata?: boolean;
+  transform?: TransformOptions;
+  pdfPageSize?: 'fit' | 'a4' | 'letter';
 }
 
 export interface ImageInspection {
@@ -90,7 +99,7 @@ export interface JobRequest {
   jobId: string;
   input: File | Blob;
   inputName?: string;
-  operation: 'compress' | 'resize' | 'convert' | 'fix' | 'inspect' | 'metadata';
+  operation: 'compress' | 'resize' | 'convert' | 'fix' | 'inspect' | 'metadata' | 'pdf';
   constraints: JobConstraints;
   budget?: MemoryBudget;
   timeoutMs?: number;
@@ -136,6 +145,8 @@ export function getExtensionForMime(mime: string): string {
       return 'png';
     case 'image/webp':
       return 'webp';
+    case 'application/pdf':
+      return 'pdf';
     default:
       return 'bin';
   }

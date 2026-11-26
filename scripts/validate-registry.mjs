@@ -14,7 +14,7 @@ if (!Array.isArray(tools) || tools.length === 0) {
   process.exit(1);
 }
 
-const VALID_ENGINES = new Set(['compress', 'resize', 'convert', 'fix', 'inspect', 'metadata']);
+const VALID_ENGINES = new Set(['compress', 'resize', 'convert', 'fix', 'inspect', 'metadata', 'pdf']);
 const VALID_CATEGORIES = new Set(['compress', 'resize', 'convert', 'fix', 'privacy']);
 const VALID_STATUSES = new Set(['draft', 'beta', 'published', 'retired']);
 

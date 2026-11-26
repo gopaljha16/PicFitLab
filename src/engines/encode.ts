@@ -1,4 +1,4 @@
-import { EngineError, type SupportedOutputMime } from './contracts';
+import { EngineError, type SupportedOutputMime, type TransformOptions } from './contracts';
 import type { DecodedBitmap } from './decode';
 import type { DrawPlan } from './geometry';
 import { detectMimeFromBytes } from './inspect';
@@ -9,7 +9,8 @@ export function prepareCanvas(
   decoded: DecodedBitmap,
   plan: DrawPlan,
   format: SupportedOutputMime,
-  matteColor = '#ffffff'
+  matteColor = '#ffffff',
+  transform?: TransformOptions
 ): PreparedCanvas {
   const { canvasWidth, canvasHeight } = plan;
 
@@ -19,7 +20,7 @@ export function prepareCanvas(
     if (!ctx) {
       throw new EngineError('ENCODER_UNAVAILABLE', '2D canvas context is unavailable.');
     }
-    drawOntoContext(ctx, decoded, plan, format, matteColor);
+    drawOntoContext(ctx, decoded, plan, format, matteColor, transform);
     return canvas;
   }
 
@@ -31,11 +32,40 @@ export function prepareCanvas(
     if (!ctx) {
       throw new EngineError('ENCODER_UNAVAILABLE', '2D canvas context is unavailable.');
     }
-    drawOntoContext(ctx, decoded, plan, format, matteColor);
+    drawOntoContext(ctx, decoded, plan, format, matteColor, transform);
     return canvas;
   }
 
   throw new EngineError('ENCODER_UNAVAILABLE', 'No canvas encoder is available in this environment.');
+}
+
+function applyCornerClip(
+  ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  cornerRadius: 'circle' | number
+) {
+  ctx.beginPath();
+  if (cornerRadius === 'circle') {
+    ctx.ellipse(w / 2, h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  } else {
+    const r = Math.max(0, Math.min(cornerRadius, w / 2, h / 2));
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(0, 0, w, h, r);
+    } else {
+      ctx.moveTo(r, 0);
+      ctx.lineTo(w - r, 0);
+      ctx.quadraticCurveTo(w, 0, w, r);
+      ctx.lineTo(w, h - r);
+      ctx.quadraticCurveTo(w, h, w - r, h);
+      ctx.lineTo(r, h);
+      ctx.quadraticCurveTo(0, h, 0, h - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+    }
+  }
+  ctx.closePath();
+  ctx.clip();
 }
 
 function drawOntoContext(
@@ -43,27 +73,65 @@ function drawOntoContext(
   decoded: DecodedBitmap,
   plan: DrawPlan,
   format: SupportedOutputMime,
-  matteColor: string
+  matteColor: string,
+  transform?: TransformOptions
 ) {
+  ctx.save();
+
+  if (transform?.cornerRadius !== undefined) {
+    ctx.clearRect(0, 0, plan.canvasWidth, plan.canvasHeight);
+    applyCornerClip(ctx, plan.canvasWidth, plan.canvasHeight, transform.cornerRadius);
+  }
+
   if (format === 'image/jpeg') {
     ctx.fillStyle = matteColor;
     ctx.fillRect(0, 0, plan.canvasWidth, plan.canvasHeight);
-  } else {
+  } else if (transform?.cornerRadius === undefined) {
     ctx.clearRect(0, 0, plan.canvasWidth, plan.canvasHeight);
   }
+
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(
-    decoded.source,
-    plan.sx,
-    plan.sy,
-    plan.sw,
-    plan.sh,
-    plan.dx,
-    plan.dy,
-    plan.dw,
-    plan.dh
-  );
+
+  const rot = transform?.rotateDeg ?? 0;
+  const flipH = transform?.flipH ? -1 : 1;
+  const flipV = transform?.flipV ? -1 : 1;
+
+  if (rot !== 0 || flipH !== 1 || flipV !== 1) {
+    const swap = rot === 90 || rot === 270;
+    const drawW = swap ? plan.dh : plan.dw;
+    const drawH = swap ? plan.dw : plan.dh;
+    ctx.translate(plan.canvasWidth / 2, plan.canvasHeight / 2);
+    if (rot !== 0) {
+      ctx.rotate((rot * Math.PI) / 180);
+    }
+    ctx.scale(flipH, flipV);
+    ctx.drawImage(
+      decoded.source,
+      plan.sx,
+      plan.sy,
+      plan.sw,
+      plan.sh,
+      -drawW / 2,
+      -drawH / 2,
+      drawW,
+      drawH
+    );
+  } else {
+    ctx.drawImage(
+      decoded.source,
+      plan.sx,
+      plan.sy,
+      plan.sw,
+      plan.sh,
+      plan.dx,
+      plan.dy,
+      plan.dw,
+      plan.dh
+    );
+  }
+
+  ctx.restore();
 }
 
 export async function encodePreparedCanvas(

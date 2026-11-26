@@ -84,6 +84,12 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
   const [cropW, setCropW] = useState<string>('');
   const [cropH, setCropH] = useState<string>('');
 
+  const [rotateDeg, setRotateDeg] = useState<0 | 90 | 180 | 270>(0);
+  const [flipH, setFlipH] = useState<boolean>(false);
+  const [flipV, setFlipV] = useState<boolean>(false);
+  const [cornerShape, setCornerShape] = useState<'circle' | 'rounded-sm' | 'rounded-lg'>('circle');
+  const [pdfPageSize, setPdfPageSize] = useState<'a4' | 'letter' | 'fit'>('a4');
+
   const [stage, setStage] = useState<JobStage>('idle');
   const [result, setResult] = useState<JobResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -144,6 +150,8 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       if (
         tool.engine === 'resize' &&
         tool.id !== 'crop-image' &&
+        tool.id !== 'rotate-flip-image' &&
+        tool.id !== 'circle-crop-image' &&
         !tool.defaults.width &&
         !tool.defaults.height &&
         info.width &&
@@ -286,6 +294,18 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           matteColor,
           ...(cropRect ? { crop: cropRect } : {}),
           stripMetadata: tool.engine === 'metadata',
+          ...(tool.id === 'rotate-flip-image'
+            ? { transform: { rotateDeg, flipH, flipV } }
+            : {}),
+          ...(tool.id === 'circle-crop-image'
+            ? {
+                transform: {
+                  cornerRadius:
+                    cornerShape === 'circle' ? ('circle' as const) : cornerShape === 'rounded-sm' ? 24 : 64,
+                },
+              }
+            : {}),
+          ...(tool.engine === 'pdf' ? { pdfPageSize } : {}),
         },
       },
       setStage
@@ -294,7 +314,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     setResult(jobResult);
     setStage(jobResult.stage);
 
-    if (jobResult.output) {
+    if (jobResult.output && jobResult.actual?.mime !== 'application/pdf') {
       setOutputPreviewUrl(URL.createObjectURL(jobResult.output));
     }
     if (jobResult.stage === 'failed' && jobResult.message) {
@@ -360,10 +380,18 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     cancelled: 'Cancelled',
   };
 
-  const showDimensionsPanel = (tool.engine === 'resize' || tool.engine === 'fix') && tool.id !== 'crop-image';
+  const showDimensionsPanel =
+    (tool.engine === 'resize' || tool.engine === 'fix') &&
+    tool.id !== 'crop-image' &&
+    tool.id !== 'rotate-flip-image' &&
+    tool.id !== 'circle-crop-image';
   const showCropPanel = tool.id === 'crop-image';
+  const showRotatePanel = tool.id === 'rotate-flip-image';
+  const showCirclePanel = tool.id === 'circle-crop-image';
+  const showPdfPanel = tool.engine === 'pdf';
   const showCompressionPanel = tool.engine === 'compress' || tool.engine === 'fix';
-  const showFormatPanel = tool.engine !== 'inspect' && tool.engine !== 'metadata';
+  const showFormatPanel =
+    tool.engine !== 'inspect' && tool.engine !== 'metadata' && tool.engine !== 'pdf';
 
   return (
     <section
@@ -851,6 +879,132 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     value={cropH}
                     onChange={(e) => setCropH(e.target.value)}
                     className="ws-input font-mono tabular-nums"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showRotatePanel && (
+            <div className="ws-panel">
+              <h3 className="ws-panel-title">
+                <RotateCcw size={16} aria-hidden="true" className="text-muted-foreground" />
+                Rotate &amp; Flip
+              </h3>
+              <div className="ws-presets">
+                {([0, 90, 180, 270] as const).map((deg) => (
+                  <button
+                    key={deg}
+                    type="button"
+                    className={`btn ws-preset-btn ${rotateDeg === deg ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setRotateDeg(deg)}
+                  >
+                    {deg}°
+                  </button>
+                ))}
+              </div>
+              <div className="ws-checkbox-row">
+                <label className="ws-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={flipH}
+                    onChange={(e) => setFlipH(e.target.checked)}
+                  />
+                  <span>Flip horizontal</span>
+                </label>
+                <label className="ws-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={flipV}
+                    onChange={(e) => setFlipV(e.target.checked)}
+                  />
+                  <span>Flip vertical</span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {showCirclePanel && (
+            <div className="ws-panel">
+              <h3 className="ws-panel-title">
+                <Crop size={16} aria-hidden="true" className="text-muted-foreground" />
+                Avatar Shape &amp; Size
+              </h3>
+              <div className="ws-presets">
+                <button
+                  type="button"
+                  className={`btn ws-preset-btn ${cornerShape === 'circle' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCornerShape('circle')}
+                >
+                  Circle
+                </button>
+                <button
+                  type="button"
+                  className={`btn ws-preset-btn ${cornerShape === 'rounded-sm' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCornerShape('rounded-sm')}
+                >
+                  Rounded (24px)
+                </button>
+                <button
+                  type="button"
+                  className={`btn ws-preset-btn ${cornerShape === 'rounded-lg' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCornerShape('rounded-lg')}
+                >
+                  Rounded (64px)
+                </button>
+              </div>
+              <div className="ws-presets">
+                {[256, 512, 1024].map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    className={`btn ws-preset-btn ${width === String(sz) ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => {
+                      setWidth(String(sz));
+                      setHeight(String(sz));
+                    }}
+                  >
+                    {sz}×{sz}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {showPdfPanel && (
+            <div className="ws-panel md:col-span-2">
+              <h3 className="ws-panel-title">
+                <FileImage size={16} aria-hidden="true" className="text-muted-foreground" />
+                PDF Page Settings
+              </h3>
+              <div className="ws-row">
+                <div className="ws-field">
+                  <label htmlFor="ctrl-pdf-page" className="ws-label">
+                    Page size
+                  </label>
+                  <select
+                    id="ctrl-pdf-page"
+                    value={pdfPageSize}
+                    onChange={(e) => setPdfPageSize(e.target.value as 'a4' | 'letter' | 'fit')}
+                    className="ws-input"
+                  >
+                    <option value="a4">A4 (auto portrait/landscape)</option>
+                    <option value="letter">US Letter</option>
+                    <option value="fit">Fit exact image size</option>
+                  </select>
+                </div>
+                <div className="ws-field">
+                  <label htmlFor="ctrl-pdf-quality" className="ws-label">
+                    Image quality ({quality}%)
+                  </label>
+                  <input
+                    id="ctrl-pdf-quality"
+                    type="range"
+                    min={30}
+                    max={100}
+                    value={quality}
+                    onChange={(e) => setQuality(Number(e.target.value))}
+                    className="min-h-[40px] w-full accent-primary"
                   />
                 </div>
               </div>

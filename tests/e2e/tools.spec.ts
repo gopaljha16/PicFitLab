@@ -117,6 +117,7 @@ test.describe('PicFitLab Full Web E2E & Privacy QA', () => {
       buffer: pngBuf,
     });
 
+    await expect(page.getByText('800×400 px')).toBeVisible();
     await page.getByRole('button', { name: '1:1 Square' }).click();
     await page.getByRole('button', { name: /Process image/i }).click();
     await expect(page.getByText('400×400 — pass')).toBeVisible({ timeout: 15000 });
@@ -195,5 +196,51 @@ test.describe('PicFitLab Full Web E2E & Privacy QA', () => {
 
     const res = await page.goto('/this-tool-does-not-exist/');
     expect(res?.status()).toBe(404);
+  });
+
+  test('new tools: passport-photo-resizer, rotate-flip-image, circle-crop-image, and image-to-pdf work', async ({
+    page,
+  }) => {
+    await page.goto('/passport-photo-resizer/');
+    const passportBuf = await makeSyntheticImageBuffer(page, 900, 900, 'image/png');
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'portrait.png',
+      mimeType: 'image/png',
+      buffer: passportBuf,
+    });
+    await page.getByRole('button', { name: /Process image/i }).click();
+    await expect(page.getByText('600×600 — pass')).toBeVisible({ timeout: 15000 });
+
+    await page.goto('/rotate-flip-image/');
+    const wideBuf = await makeSyntheticImageBuffer(page, 800, 400, 'image/png');
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'wide.png',
+      mimeType: 'image/png',
+      buffer: wideBuf,
+    });
+    await page.getByRole('button', { name: '90°' }).click();
+    await page.getByRole('button', { name: /Process image/i }).click();
+    await expect(page.getByText('400×800 — pass')).toBeVisible({ timeout: 15000 });
+
+    await page.goto('/circle-crop-image/');
+    const avatarBuf = await makeSyntheticImageBuffer(page, 600, 600, 'image/png');
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'avatar.png',
+      mimeType: 'image/png',
+      buffer: avatarBuf,
+    });
+    await page.getByRole('button', { name: /Process image/i }).click();
+    await expect(page.getByText('512×512 — pass')).toBeVisible({ timeout: 15000 });
+
+    await page.goto('/image-to-pdf/');
+    const docBuf = await makeSyntheticImageBuffer(page, 600, 800, 'image/png');
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'scan.png',
+      mimeType: 'image/png',
+      buffer: docBuf,
+    });
+    await page.getByRole('button', { name: /Process image/i }).click();
+    await expect(page.getByText('PDF — pass')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: /Download/i })).toBeVisible();
   });
 });

@@ -1,4 +1,4 @@
-import { EngineError, type FitMode, type SupportedOutputMime } from './contracts';
+import { EngineError, type FitMode, type SupportedOutputMime, type TransformOptions } from './contracts';
 import type { DecodedBitmap } from './decode';
 import { computeDrawPlan } from './geometry';
 import { encodePreparedCanvas, prepareCanvas, type PreparedCanvas } from './encode';
@@ -11,6 +11,7 @@ export interface CompressOptions {
   fit: FitMode;
   crop?: CropRect;
   matteColor?: string;
+  transform?: TransformOptions;
   initialQuality?: number;
   qualityFloor?: number;
   maxBytes?: number;
@@ -331,15 +332,17 @@ export async function compressDecodedImage(
     const key = `${width}x${height}`;
     let canvas = canvasCache.get(key);
     if (!canvas) {
+      const rot = options.transform?.rotateDeg ?? 0;
+      const swap = rot === 90 || rot === 270;
       const plan = computeDrawPlan(
-        decoded.width,
-        decoded.height,
+        swap ? decoded.height : decoded.width,
+        swap ? decoded.width : decoded.height,
         width,
         height,
         options.fit,
         options.crop
       );
-      canvas = prepareCanvas(decoded, plan, options.format, options.matteColor);
+      canvas = prepareCanvas(decoded, plan, options.format, options.matteColor, options.transform);
       canvasCache.set(key, canvas);
     }
     return encodePreparedCanvas(canvas, options.format, quality);

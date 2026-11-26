@@ -1,5 +1,5 @@
 export type ToolCategory = 'compress' | 'resize' | 'convert' | 'fix' | 'privacy';
-export type ToolEngine = 'compress' | 'resize' | 'convert' | 'fix' | 'inspect' | 'metadata';
+export type ToolEngine = 'compress' | 'resize' | 'convert' | 'fix' | 'inspect' | 'metadata' | 'pdf';
 export type ToolStatus = 'draft' | 'beta' | 'published' | 'retired';
 export type ToolSensitivity = 'general' | 'sensitive';
 
@@ -563,6 +563,80 @@ export const TOOL_REGISTRY: ToolConfig[] = [
     contentKey: 'compress-image-to-500kb',
     locale: 'en',
     sensitivity: 'general',
+  },
+  {
+    id: 'rotate-flip-image',
+    slug: 'rotate-flip-image',
+    category: 'resize',
+    engine: 'resize',
+    status: 'published',
+    indexable: true,
+    title: 'Rotate & Flip Image Online — 90°, 180°, Mirror | PicFitLab',
+    description:
+      'Rotate photos 90°, 180°, or 270° and flip horizontally or vertically locally in your browser without uploading files.',
+    h1: 'Rotate & Flip Image',
+    shortLabel: 'Rotate & Flip',
+    summary: 'Rotate 90°/180°/270° or mirror flip images locally in your browser.',
+    defaults: {
+      fit: 'contain',
+      aspectLock: true,
+      quality: 0.92,
+    },
+    acceptedFormats: COMMON_INPUT_FORMATS,
+    relatedIds: ['crop-image', 'resize-image', 'remove-image-metadata'],
+    contentKey: 'rotate-flip-image',
+    locale: 'en',
+    sensitivity: 'general',
+  },
+  {
+    id: 'circle-crop-image',
+    slug: 'circle-crop-image',
+    category: 'resize',
+    engine: 'resize',
+    status: 'published',
+    indexable: true,
+    title: 'Circle Crop & Rounded Avatar Maker Online | PicFitLab',
+    description:
+      'Crop photos into a crisp circle or rounded square PNG with a transparent background locally in your browser.',
+    h1: 'Circle Crop & Avatar Maker',
+    shortLabel: 'Circle Crop',
+    summary: 'Crop photos into transparent-background circles or rounded avatars.',
+    defaults: {
+      width: 512,
+      height: 512,
+      format: 'image/png',
+      fit: 'cover',
+      aspectLock: false,
+    },
+    acceptedFormats: COMMON_INPUT_FORMATS,
+    relatedIds: ['crop-image', 'resize-image-to-600x600', 'png-to-webp'],
+    contentKey: 'circle-crop-image',
+    locale: 'en',
+    sensitivity: 'general',
+  },
+  {
+    id: 'image-to-pdf',
+    slug: 'image-to-pdf',
+    category: 'convert',
+    engine: 'pdf',
+    status: 'published',
+    indexable: true,
+    title: 'Convert Image to PDF Online — JPG & PNG to PDF | PicFitLab',
+    description:
+      'Convert JPG, PNG, or WebP images into a clean A4, Letter, or exact-fit PDF document locally in your browser without uploading.',
+    h1: 'Convert Image to PDF',
+    shortLabel: 'Image to PDF',
+    summary: 'Convert JPG, PNG, or WebP images to a verified A4, Letter, or Fit PDF locally.',
+    defaults: {
+      format: 'image/jpeg',
+      fit: 'contain',
+      quality: 0.9,
+    },
+    acceptedFormats: COMMON_INPUT_FORMATS,
+    relatedIds: ['compress-image', 'jpg-to-png', 'fix-image-upload-error'],
+    contentKey: 'image-to-pdf',
+    locale: 'en',
+    sensitivity: 'sensitive',
   },
 ];
 

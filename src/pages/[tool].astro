@@ -59,7 +59,7 @@ const content = getToolContent(tool.contentKey);
       <h2 class="m-0 text-lg font-semibold tracking-tight text-foreground">
         How to use {tool.shortLabel}
       </h2>
-      <ol class="m-0 space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+      <ol class="m-0 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
         {content.howTo.map((step) => <li>{step}</li>)}
       </ol>
       {

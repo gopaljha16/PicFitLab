@@ -806,7 +806,11 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           )}
 
           {showFormatPanel && (
-            <div className="ws-panel">
+            <div
+              className={`ws-panel ${
+                showDimensionsPanel && showCompressionPanel ? 'md:col-span-2' : ''
+              }`}
+            >
               <h3 className="ws-panel-title">
                 <FileImage size={16} aria-hidden="true" className="text-muted-foreground" />
                 Output Format &amp; Quality
@@ -848,15 +852,20 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                 {format === 'image/jpeg' && (
                   <div className="ws-field">
                     <label htmlFor="ctrl-matte" className="ws-label">
-                      Matte ({matteColor.toUpperCase()})
+                      Matte background
                     </label>
-                    <input
-                      id="ctrl-matte"
-                      type="color"
-                      value={matteColor}
-                      onChange={(e) => setMatteColor(e.target.value)}
-                      className="h-10 w-full cursor-pointer rounded-md border border-input bg-background p-1"
-                    />
+                    <div className="flex h-10 items-center gap-2.5 rounded-md border border-input bg-background px-2.5">
+                      <input
+                        id="ctrl-matte"
+                        type="color"
+                        value={matteColor}
+                        onChange={(e) => setMatteColor(e.target.value)}
+                        className="h-6 w-8 cursor-pointer rounded border border-border bg-transparent p-0"
+                      />
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {matteColor.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>

@@ -13,6 +13,7 @@ import {
   Crop,
   Download,
   FileImage,
+  Loader2,
   Maximize2,
   Minimize2,
   RotateCcw,
@@ -90,6 +91,10 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
   useEffect(() => {
     managerRef.current = new ImageJobManager();
     recordRecentTool(tool.id);
+    const pendingFile = inputRef.current?.files?.[0];
+    if (pendingFile) {
+      void handleFile(pendingFile);
+    }
     return () => {
       managerRef.current?.cancelActive();
       managerRef.current?.disposeWorker();
@@ -343,6 +348,18 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
     return `${inspection.width / d}:${inspection.height / d}`;
   }, [inspection]);
 
+  const stageLabel: Partial<Record<JobStage, string>> = {
+    idle: 'Ready',
+    validating: 'Validating file…',
+    decoding: 'Decoding image…',
+    ready: 'File ready',
+    processing: 'Processing locally in Web Worker…',
+    verifying: 'Verifying output…',
+    success: 'Complete',
+    failed: 'Processing failed',
+    cancelled: 'Cancelled',
+  };
+
   const showDimensionsPanel = (tool.engine === 'resize' || tool.engine === 'fix') && tool.id !== 'crop-image';
   const showCropPanel = tool.id === 'crop-image';
   const showCompressionPanel = tool.engine === 'compress' || tool.engine === 'fix';
@@ -351,8 +368,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
   return (
     <section
       aria-label={`${tool.shortLabel} workspace`}
-      className="card"
-      style={{ marginTop: '16px' }}
+      className="mt-5 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-6"
       onPaste={onPaste}
     >
       <div
@@ -366,17 +382,16 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        style={{
-          border: `2px dashed ${isDragging ? 'var(--color-primary-btn)' : 'var(--color-border)'}`,
-          borderRadius: 'var(--radius-md)',
-          padding: '24px 16px',
-          textAlign: 'center',
-          backgroundColor: isDragging ? 'var(--color-primary-soft)' : 'var(--color-surface)',
-          transition: 'border-color 150ms ease, background-color 150ms ease',
-        }}
+        className={`rounded-lg border-2 border-dashed px-4 py-7 text-center transition-colors ${
+          isDragging
+            ? 'border-foreground bg-accent/60'
+            : 'border-border bg-muted/30 hover:border-foreground/30'
+        }`}
       >
-        <Upload size={28} aria-hidden="true" style={{ marginInline: 'auto', color: 'var(--color-primary)' }} />
-        <p style={{ margin: '8px 0 12px', fontWeight: 600 }}>
+        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-foreground shadow-xs">
+          <Upload size={18} aria-hidden="true" />
+        </div>
+        <p className="m-0 mb-3 text-sm font-medium text-foreground">
           Drop or paste an image here, or choose a file from your device
         </p>
         <input
@@ -388,23 +403,23 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           className="sr-only"
           id={`file-input-${tool.id}`}
         />
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap justify-center gap-2">
           <button
             type="button"
             className="btn btn-primary"
             onClick={() => inputRef.current?.click()}
           >
-            <Upload size={16} aria-hidden="true" />
+            <Upload size={15} aria-hidden="true" />
             Choose image
           </button>
           {selectedFile && (
             <button type="button" className="btn btn-secondary" onClick={handleReset}>
-              <RotateCcw size={16} aria-hidden="true" />
+              <RotateCcw size={15} aria-hidden="true" />
               Reset
             </button>
           )}
         </div>
-        <p style={{ margin: '10px 0 0', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+        <p className="mb-0 mt-3 text-xs text-muted-foreground">
           Supported: {tool.acceptedFormats.map((m) => m.replace('image/', '').toUpperCase()).join(', ')}
           {' · '}Desktop limit: 20 MB / 24 MP
         </p>
@@ -413,23 +428,13 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       {errorMsg && (
         <div
           role="alert"
-          style={{
-            marginTop: '16px',
-            padding: '12px',
-            borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'var(--color-error-soft)',
-            color: 'var(--color-error)',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '8px',
-            fontSize: '0.9375rem',
-          }}
+          className="mt-4 flex items-start gap-2.5 rounded-lg border border-destructive/40 bg-destructive/10 p-3.5 text-sm text-destructive"
         >
-          <XCircle size={18} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <XCircle size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
           <div>
-            <strong>{errorMsg}</strong>
+            <strong className="font-semibold">{errorMsg}</strong>
             {result?.suggestions && result.suggestions.length > 0 && (
-              <ul style={{ margin: '6px 0 0', paddingLeft: '18px' }}>
+              <ul className="mb-0 mt-1.5 list-disc pl-4 text-xs">
                 {result.suggestions.map((s) => (
                   <li key={s}>{s}</li>
                 ))}
@@ -440,76 +445,72 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       )}
 
       {inspection && (
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            fontSize: '0.875rem',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '16px',
-          }}
-        >
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs sm:text-sm">
           <span>
-            <strong>Format:</strong> {inspection.detectedMime.replace('image/', '').toUpperCase()}
+            <strong className="font-medium text-muted-foreground">Format:</strong>{' '}
+            <span className="font-mono font-medium text-foreground">
+              {inspection.detectedMime.replace('image/', '').toUpperCase()}
+            </span>
           </span>
           <span>
-            <strong>Size:</strong> {formatBytes(inspection.bytes)}
+            <strong className="font-medium text-muted-foreground">Size:</strong>{' '}
+            <span className="font-mono font-medium tabular-nums text-foreground">
+              {formatBytes(inspection.bytes)}
+            </span>
           </span>
           {inspection.width && inspection.height && (
             <span>
-              <strong>Dimensions:</strong> {inspection.width}×{inspection.height} px
+              <strong className="font-medium text-muted-foreground">Dimensions:</strong>{' '}
+              <span className="font-mono font-medium tabular-nums text-foreground">
+                {inspection.width}×{inspection.height} px
+              </span>
             </span>
           )}
           <span>
-            <strong>Metadata:</strong>{' '}
-            {inspection.hasGps ? 'GPS + EXIF present' : inspection.hasExif ? 'EXIF present' : 'None detected'}
+            <strong className="font-medium text-muted-foreground">Metadata:</strong>{' '}
+            <span className="font-medium text-foreground">
+              {inspection.hasGps ? 'GPS + EXIF present' : inspection.hasExif ? 'EXIF present' : 'None detected'}
+            </span>
           </span>
           {inspection.dpi && (
             <span>
-              <strong>DPI:</strong> {inspection.dpi.x}×{inspection.dpi.y} ({inspection.dpi.unit})
+              <strong className="font-medium text-muted-foreground">DPI:</strong>{' '}
+              <span className="font-mono font-medium tabular-nums text-foreground">
+                {inspection.dpi.x}×{inspection.dpi.y} ({inspection.dpi.unit})
+              </span>
             </span>
           )}
         </div>
       )}
 
       {tool.engine === 'inspect' && inspection && (
-        <div className="ws-panel" style={{ marginTop: '16px' }}>
+        <div className="ws-panel mt-4">
           <h3 className="ws-panel-title">
-            <FileImage size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+            <FileImage size={16} aria-hidden="true" className="text-muted-foreground" />
             Detailed Image Report
           </h3>
-          <dl
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '12px',
-              margin: 0,
-              fontSize: '0.875rem',
-            }}
-          >
-            <div>
-              <dt style={{ color: 'var(--color-text-secondary)' }}>Detected MIME</dt>
-              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>{inspection.detectedMime}</dd>
+          <dl className="m-0 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-md border border-border bg-background p-3">
+              <dt className="text-xs text-muted-foreground">Detected MIME</dt>
+              <dd className="m-0 mt-1 font-mono text-sm font-semibold text-foreground">
+                {inspection.detectedMime}
+              </dd>
             </div>
-            <div>
-              <dt style={{ color: 'var(--color-text-secondary)' }}>File extension</dt>
-              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>
+            <div className="rounded-md border border-border bg-background p-3">
+              <dt className="text-xs text-muted-foreground">File extension</dt>
+              <dd className="m-0 mt-1 font-mono text-sm font-semibold text-foreground">
                 {inspection.extension ? `.${inspection.extension}` : 'None'}
               </dd>
             </div>
-            <div>
-              <dt style={{ color: 'var(--color-text-secondary)' }}>Exact bytes / KiB</dt>
-              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>
+            <div className="rounded-md border border-border bg-background p-3">
+              <dt className="text-xs text-muted-foreground">Exact bytes / KiB</dt>
+              <dd className="m-0 mt-1 font-mono text-sm font-semibold tabular-nums text-foreground">
                 {inspection.bytes.toLocaleString()} B ({(inspection.bytes / 1024).toFixed(1)} KiB)
               </dd>
             </div>
-            <div>
-              <dt style={{ color: 'var(--color-text-secondary)' }}>Megapixels / Ratio</dt>
-              <dd style={{ margin: '2px 0 0', fontWeight: 600 }}>
+            <div className="rounded-md border border-border bg-background p-3">
+              <dt className="text-xs text-muted-foreground">Megapixels / Ratio</dt>
+              <dd className="m-0 mt-1 font-mono text-sm font-semibold tabular-nums text-foreground">
                 {inspection.width && inspection.height
                   ? `${((inspection.width * inspection.height) / 1_000_000).toFixed(2)} MP (${aspectRatioLabel})`
                   : 'Unknown'}
@@ -520,12 +521,12 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       )}
 
       {tool.engine === 'metadata' && (
-        <div className="ws-panel" style={{ marginTop: '16px' }}>
+        <div className="ws-panel mt-4">
           <h3 className="ws-panel-title">
-            <ShieldOff size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+            <ShieldOff size={16} aria-hidden="true" className="text-muted-foreground" />
             Metadata &amp; GPS Stripping
           </h3>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+          <p className="m-0 text-sm text-muted-foreground">
             Re-encodes the image pixels locally in your browser to strip targeted EXIF camera tags
             and GPS coordinates, then verifies the output file.
           </p>
@@ -537,7 +538,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           {showDimensionsPanel && (
             <div className="ws-panel">
               <h3 className="ws-panel-title">
-                <Maximize2 size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                <Maximize2 size={16} aria-hidden="true" className="text-muted-foreground" />
                 Dimensions &amp; Fit
               </h3>
               {tool.id === 'resize-image' && inspection?.width && inspection?.height && (
@@ -591,7 +592,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     value={width}
                     onChange={(e) => onWidthChange(e.target.value)}
                     placeholder="Auto"
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
                 <div className="ws-field">
@@ -606,7 +607,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     value={height}
                     onChange={(e) => onHeightChange(e.target.value)}
                     placeholder="Auto"
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
                 <div className="ws-field">
@@ -641,7 +642,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           {showCropPanel && (
             <div className="ws-panel">
               <h3 className="ws-panel-title">
-                <Crop size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                <Crop size={16} aria-hidden="true" className="text-muted-foreground" />
                 Crop Bounds
               </h3>
               <div className="ws-presets">
@@ -692,7 +693,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     min={0}
                     value={cropX}
                     onChange={(e) => setCropX(e.target.value)}
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
                 <div className="ws-field">
@@ -705,7 +706,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     min={0}
                     value={cropY}
                     onChange={(e) => setCropY(e.target.value)}
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
                 <div className="ws-field">
@@ -718,7 +719,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     min={1}
                     value={cropW}
                     onChange={(e) => setCropW(e.target.value)}
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
                 <div className="ws-field">
@@ -731,7 +732,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     min={1}
                     value={cropH}
                     onChange={(e) => setCropH(e.target.value)}
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
               </div>
@@ -741,7 +742,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           {showCompressionPanel && (
             <div className="ws-panel">
               <h3 className="ws-panel-title">
-                <Minimize2 size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                <Minimize2 size={16} aria-hidden="true" className="text-muted-foreground" />
                 File Size Target
               </h3>
               {tool.id === 'compress-image-to-kb' && (
@@ -771,7 +772,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                     value={maxKb}
                     onChange={(e) => setMaxKb(e.target.value)}
                     placeholder="Optional"
-                    className="ws-input"
+                    className="ws-input font-mono tabular-nums"
                   />
                 </div>
                 {tool.engine === 'fix' && (
@@ -786,7 +787,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                       max={80}
                       value={qualityFloor}
                       onChange={(e) => setQualityFloor(Number(e.target.value))}
-                      style={{ width: '100%', minHeight: '44px' }}
+                      className="min-h-[40px] w-full accent-primary"
                     />
                   </div>
                 )}
@@ -807,7 +808,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
           {showFormatPanel && (
             <div className="ws-panel">
               <h3 className="ws-panel-title">
-                <FileImage size={18} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                <FileImage size={16} aria-hidden="true" className="text-muted-foreground" />
                 Output Format &amp; Quality
               </h3>
               <div className="ws-row">
@@ -839,7 +840,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                       max={100}
                       value={quality}
                       onChange={(e) => setQuality(Number(e.target.value))}
-                      style={{ width: '100%', minHeight: '44px' }}
+                      className="min-h-[40px] w-full accent-primary"
                     />
                   </div>
                 )}
@@ -854,14 +855,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                       type="color"
                       value={matteColor}
                       onChange={(e) => setMatteColor(e.target.value)}
-                      style={{
-                        width: '100%',
-                        height: '44px',
-                        padding: '4px',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'var(--color-bg)',
-                      }}
+                      className="h-10 w-full cursor-pointer rounded-md border border-input bg-background p-1"
                     />
                   </div>
                 )}
@@ -872,34 +866,19 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       )}
 
       {tool.engine !== 'inspect' && (
-        <div
-          style={{
-            marginTop: '20px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-            paddingTop: '16px',
-            borderTop: '1px solid var(--color-border)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.875rem',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            <ShieldCheck size={18} aria-hidden="true" style={{ color: 'var(--color-success)' }} />
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+            {isBusy ? (
+              <Loader2 size={16} aria-hidden="true" className="animate-spin text-foreground" />
+            ) : (
+              <ShieldCheck size={16} aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" />
+            )}
             <span>
-              {isBusy ? `Stage: ${stage}...` : 'Runs locally in your browser. Files are never uploaded.'}
+              {isBusy ? (stageLabel[stage] ?? 'Processing…') : 'Runs locally in your browser. Files are never uploaded.'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="flex gap-2">
             {isBusy ? (
               <button type="button" className="btn btn-secondary" onClick={handleCancel}>
                 Cancel
@@ -911,7 +890,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                 disabled={!selectedFile}
                 onClick={() => void handleProcess()}
               >
-                <Sliders size={18} aria-hidden="true" />
+                <Sliders size={15} aria-hidden="true" />
                 {tool.engine === 'metadata' ? 'Remove metadata' : 'Process image'}
               </button>
             )}
@@ -920,18 +899,11 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
       )}
 
       {(inputPreviewUrl || outputPreviewUrl) && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '16px',
-            marginTop: '20px',
-          }}
-        >
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {inputPreviewUrl && (
-            <figure style={{ margin: 0 }}>
-              <figcaption style={{ fontSize: '0.8125rem', fontWeight: 600, marginBottom: '6px' }}>
-                Original{' '}
+            <figure className="m-0 rounded-lg border border-border bg-muted/20 p-3">
+              <figcaption className="mb-2 text-xs font-medium text-muted-foreground">
+                <span className="font-semibold text-foreground">Original</span>{' '}
                 {inspection
                   ? `· ${inspection.width ?? '?'}×${inspection.height ?? '?'} · ${formatBytes(inspection.bytes)}`
                   : ''}
@@ -939,21 +911,14 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
               <img
                 src={inputPreviewUrl}
                 alt="Original input preview"
-                className="alpha-checkerboard"
-                style={{
-                  maxHeight: '240px',
-                  width: '100%',
-                  objectFit: 'contain',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                }}
+                className="alpha-checkerboard max-h-60 w-full rounded-md border border-border object-contain"
               />
             </figure>
           )}
           {outputPreviewUrl && (
-            <figure style={{ margin: 0 }}>
-              <figcaption style={{ fontSize: '0.8125rem', fontWeight: 600, marginBottom: '6px' }}>
-                Result{' '}
+            <figure className="m-0 rounded-lg border border-border bg-muted/20 p-3">
+              <figcaption className="mb-2 text-xs font-medium text-muted-foreground">
+                <span className="font-semibold text-foreground">Result</span>{' '}
                 {result?.actual
                   ? `· ${result.actual.width}×${result.actual.height} · ${formatBytes(result.actual.bytes)}`
                   : ''}
@@ -964,14 +929,7 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
               <img
                 src={outputPreviewUrl}
                 alt="Processed output preview"
-                className="alpha-checkerboard"
-                style={{
-                  maxHeight: '240px',
-                  width: '100%',
-                  objectFit: 'contain',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                }}
+                className="alpha-checkerboard max-h-60 w-full rounded-md border border-border object-contain"
               />
             </figure>
           )}
@@ -980,30 +938,18 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
 
       {result && result.checks.length > 0 && (
         <div
-          style={{
-            marginTop: '20px',
-            padding: '16px',
-            borderRadius: 'var(--radius-md)',
-            border: `1px solid ${result.stage === 'success' ? 'var(--color-success)' : 'var(--color-warning)'}`,
-            backgroundColor:
-              result.stage === 'success' ? 'var(--color-success-soft)' : 'var(--color-warning-soft)',
-          }}
+          className={`mt-5 rounded-lg border p-4 ${
+            result.stage === 'success'
+              ? 'border-emerald-500/40 bg-emerald-500/5'
+              : 'border-amber-500/40 bg-amber-500/5'
+          }`}
         >
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-              marginBottom: '12px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               {result.stage === 'success' ? (
-                <CheckCircle2 size={20} aria-hidden="true" style={{ color: 'var(--color-success)' }} />
+                <CheckCircle2 size={18} aria-hidden="true" className="text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <AlertCircle size={20} aria-hidden="true" style={{ color: 'var(--color-warning)' }} />
+                <AlertCircle size={18} aria-hidden="true" className="text-amber-600 dark:text-amber-400" />
               )}
               <span>
                 {result.stage === 'success'
@@ -1023,53 +969,37 @@ export default function ToolWorkspaceShell({ tool }: ToolWorkspaceShellProps) {
                   )
                 }
               >
-                <Download size={18} aria-hidden="true" />
+                <Download size={15} aria-hidden="true" />
                 Download ({formatBytes(result.output.size)})
               </button>
             )}
           </div>
 
           {result.suggestions && result.suggestions.length > 0 && (
-            <ul style={{ margin: '0 0 12px', paddingLeft: '18px', fontSize: '0.875rem' }}>
+            <ul className="mb-3 mt-0 list-disc pl-5 text-xs text-muted-foreground">
               {result.suggestions.map((s) => (
                 <li key={s}>{s}</li>
               ))}
             </ul>
           )}
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <div className="overflow-x-auto rounded-md border border-border bg-card">
+            <table className="w-full border-collapse text-xs sm:text-sm">
               <thead>
-                <tr>
-                  <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                    Check
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                    Input
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                    Required
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                    Result
-                  </th>
+                <tr className="border-b border-border bg-muted/40 text-left text-xs text-muted-foreground">
+                  <th className="px-3 py-2 font-medium">Check</th>
+                  <th className="px-3 py-2 font-medium">Input</th>
+                  <th className="px-3 py-2 font-medium">Required</th>
+                  <th className="px-3 py-2 font-medium">Result</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border font-mono tabular-nums">
                 {result.checks.map((chk) => (
                   <tr key={chk.key}>
-                    <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--color-border)', fontWeight: 600 }}>
-                      {chk.label}
-                    </td>
-                    <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                      {chk.input}
-                    </td>
-                    <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                      {chk.required}
-                    </td>
-                    <td style={{ padding: '6px 8px', borderBottom: '1px solid var(--color-border)' }}>
-                      {chk.actual}
-                    </td>
+                    <td className="px-3 py-2 font-sans font-medium text-foreground">{chk.label}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{chk.input}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{chk.required}</td>
+                    <td className="px-3 py-2 font-medium text-foreground">{chk.actual}</td>
                   </tr>
                 ))}
               </tbody>

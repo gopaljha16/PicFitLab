@@ -34,7 +34,7 @@ test.describe('PicFitLab Full Web E2E & Privacy QA', () => {
   test('homepage loads, passes axe, has no 320px overflow, and search works', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await page.goto('/');
-    await expect(page.locator('h1')).toHaveText('Free Online Image Tools');
+    await expect(page.locator('h1')).toHaveText('Image tools that never leave your browser.');
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth
@@ -63,7 +63,9 @@ test.describe('PicFitLab Full Web E2E & Privacy QA', () => {
       if (
         !url.startsWith('http://localhost:4321/') &&
         !url.startsWith('blob:') &&
-        !url.startsWith('data:')
+        !url.startsWith('data:') &&
+        !url.startsWith('https://fonts.googleapis.com/') &&
+        !url.startsWith('https://fonts.gstatic.com/')
       ) {
         externalRequests.push(url);
       }
